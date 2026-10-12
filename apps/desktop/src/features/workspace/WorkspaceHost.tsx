@@ -4,9 +4,9 @@ import { LoadingState } from "@/components/states";
 import { useApp } from "@/app/store";
 import { getWorkspace } from "./presets";
 import { loadLayout, saveLayout } from "./persistence";
-import { presetDocument, repairDocument, TrellisWorkspace } from "./trellis/TrellisWorkspace";
+import { presetDocument, repairDocument } from "./dockview/document";
+import { DockviewWorkspace } from "./dockview/DockviewWorkspace";
 import type { WorkspaceApi, WorkspaceId } from "./types";
-import { useWorkspacePrefs } from "./prefs";
 
 const SAVE_DELAY_MS = 400;
 
@@ -17,7 +17,6 @@ const SAVE_DELAY_MS = 400;
 export function WorkspaceHost({ id, active }: { id: WorkspaceId; active: boolean }) {
   const preset = getWorkspace(id);
   const register = useApp((s) => s.registerWorkspace);
-  const navigation = useWorkspacePrefs((s) => s.navigation);
   const [initial, setInitial] = React.useState<ReturnType<typeof presetDocument> | null>(null);
 
   React.useEffect(() => {
@@ -69,13 +68,7 @@ export function WorkspaceHost({ id, active }: { id: WorkspaceId; active: boolean
       inert={!active}
     >
       {initial ? (
-        <TrellisWorkspace
-          preset={preset}
-          initialDocument={initial}
-          onDocumentChange={onChange}
-          onReady={onReady}
-          navigation={navigation}
-        />
+        <DockviewWorkspace preset={preset} initialDocument={initial} onDocumentChange={onChange} onReady={onReady} />
       ) : (
         <LoadingState label={`Restoring ${preset.name}…`} />
       )}

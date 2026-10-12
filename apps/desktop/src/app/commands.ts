@@ -14,7 +14,6 @@ import {
 import { openFile } from "@/features/projects/ProjectExplorerPanel";
 import { useExperiments } from "@/features/experiments/store";
 import { WORKSPACES } from "@/features/workspace/presets";
-import { useWorkspacePrefs } from "@/features/workspace/prefs";
 import { api } from "@/lib/api";
 import { fileIcon } from "@/lib/fileIcons";
 import { BACKEND_AVAILABLE, errorMessage } from "@/lib/ipc";
@@ -27,8 +26,6 @@ export function useCommands(): PaletteCommand[] {
   const goTo = useApp((s) => s.goTo);
   const toggleSidebar = useApp((s) => s.toggleSidebar);
   const theme = useTheme();
-  const navigation = useWorkspacePrefs((s) => s.navigation);
-  const setNavigation = useWorkspacePrefs((s) => s.setNavigation);
 
   return React.useMemo<PaletteCommand[]>(() => {
     const cmds: PaletteCommand[] = [
@@ -66,8 +63,8 @@ export function useCommands(): PaletteCommand[] {
         run: () => openPanel(p.type, {}, { reuse: p.singleton ? "type" : "none" }),
       })),
       { id: "ws.zoom", label: "Zoom focused panel", group: "Workspace", icon: "zoom-in", shortcut: fmtShortcut(MOD_KEY, SHIFT_KEY, "Enter"), run: () => workspaceApi()?.toggleZoom() },
-      { id: "ws.overview", label: "Show the whole workspace", group: "Workspace", icon: "zoom-out", run: () => workspaceApi()?.overview() },
-      { id: "ws.restore", label: "Restore hidden panels", group: "Workspace", icon: "visible", run: () => workspaceApi()?.restoreHidden() },
+      { id: "ws.overview", label: "Leave zoom", group: "Workspace", icon: "zoom-out", run: () => workspaceApi()?.overview() },
+      { id: "ws.float", label: "Float focused panel", group: "Workspace", icon: "external", keywords: ["undock", "window"], run: () => workspaceApi()?.floatFocused() },
       { id: "ws.close", label: "Close focused panel", group: "Workspace", icon: "close", run: () => workspaceApi()?.closeFocused() },
       {
         id: "ws.reset",
@@ -78,13 +75,6 @@ export function useCommands(): PaletteCommand[] {
           const api = workspaceApi();
           if (api && (await api.resetLayout())) toast.success("Layout reset");
         },
-      },
-      {
-        id: "ws.navigation",
-        label: navigation === "free" ? "Use focus navigation (double-click to zoom)" : "Use free navigation (pinch and gesture zoom)",
-        group: "Workspace",
-        icon: "map",
-        run: () => setNavigation(navigation === "free" ? "focus" : "free"),
       },
       {
         id: "experiments.reindex",
@@ -125,7 +115,7 @@ export function useCommands(): PaletteCommand[] {
       })),
     ];
     return cmds;
-  }, [project, recent, goTo, toggleSidebar, theme, navigation, setNavigation]);
+  }, [project, recent, goTo, toggleSidebar, theme]);
 }
 
 /** Files in the open project, as palette entries (loaded on demand). */

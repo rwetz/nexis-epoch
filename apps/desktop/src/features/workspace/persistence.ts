@@ -5,7 +5,7 @@
  *
  *   { schema, workspace, adapter, presetVersion, savedAt, document }
  *
- * `document` belongs to the layout adapter (today Trellis's LayoutDocument);
+ * `document` belongs to the layout adapter (today dockview's SerializedDockview);
  * the envelope is Epoch's. When the envelope changes shape, bump
  * `LAYOUT_SCHEMA` and add a migration from the previous schema to
  * `MIGRATIONS`. Loading runs every migration from the stored schema up, so
@@ -18,7 +18,9 @@ import { BACKEND_AVAILABLE } from "@/lib/ipc";
 import type { WorkspaceId } from "./types";
 
 export const LAYOUT_SCHEMA = 1;
-export const LAYOUT_ADAPTER = "trellis";
+/** Layouts from another adapter (Epoch 0.1.0 used Trellis) are not misread:
+ * the preset is used instead, with a notice. */
+export const LAYOUT_ADAPTER = "dockview";
 
 export interface LayoutEnvelope {
   schema: typeof LAYOUT_SCHEMA;
@@ -35,9 +37,8 @@ type Migration = (input: Json, workspace: WorkspaceId) => Json;
 
 /** `MIGRATIONS[n]` turns schema `n` into schema `n + 1`. */
 const MIGRATIONS: Record<number, Migration> = {
-  // 0 → 1. Schema 0 is a bare Trellis LayoutDocument, as `<Workspace
-  // storageKey>` writes it, with no envelope. Accepting it lets a layout
-  // exported from Trellis directly be imported.
+  // 0 → 1. Schema 0 is a bare dockview document (`api.toJSON()`) with no
+  // envelope. Accepting it lets a layout exported from dockview be imported.
   0: (doc, workspace) => ({
     schema: 1,
     workspace,
@@ -58,9 +59,8 @@ function isObject(v: unknown): v is Json {
 
 function schemaOf(raw: Json): number | null {
   if ("document" in raw && typeof raw.schema === "number") return raw.schema;
-  // A bare layout document: Trellis documents carry their own `schema: 1`
-  // plus `root` and `views`.
-  if ("root" in raw && "views" in raw) return 0;
+  // A bare dockview document: a grid plus a panel table.
+  if ("grid" in raw && "panels" in raw) return 0;
   return null;
 }
 

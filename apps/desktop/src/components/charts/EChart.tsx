@@ -1,5 +1,5 @@
 /**
- * ECharts in a panel: resizes with its container (Trellis panels resize
+ * ECharts in a panel: resizes with its container (workspace panels resize
  * constantly), re-themes when the palette changes, and disposes on unmount.
  * Charts take generic options built from generic data; nothing here knows
  * about losses, accuracies or architectures.

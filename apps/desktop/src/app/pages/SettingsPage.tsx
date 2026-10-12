@@ -24,7 +24,6 @@ import { confirmAction } from "@/components/confirm";
 import { EmptyState } from "@/components/states";
 import { WORKSPACES } from "@/features/workspace/presets";
 import { deleteLayout } from "@/features/workspace/persistence";
-import { useWorkspacePrefs } from "@/features/workspace/prefs";
 import { api } from "@/lib/api";
 import { BACKEND_AVAILABLE, errorMessage } from "@/lib/ipc";
 import type { AppInfo, AppSettings } from "@/types/backend";
@@ -91,21 +90,8 @@ function Appearance() {
 }
 
 function WorkspaceSection() {
-  const navigation = useWorkspacePrefs((s) => s.navigation);
-  const setNavigation = useWorkspacePrefs((s) => s.setNavigation);
   return (
     <Section title="Workspaces" description="Layouts are saved per workspace in the app data folder, as versioned JSON.">
-      <Field label="Navigation" inline hint="Focus: double-click a tab bar (or Ctrl/⌘+Shift+Enter) to zoom a panel. Free: also pinch and Ctrl/⌘+Alt gestures to move through nested groups.">
-        <Segmented
-          label="Navigation"
-          value={navigation}
-          onChange={setNavigation}
-          segments={[
-            { id: "focus", label: "Focus" },
-            { id: "free", label: "Free" },
-          ]}
-        />
-      </Field>
       <Field label="Saved layouts" inline hint="Takes effect the next time Epoch starts. Your panels' files are not affected.">
         <Button
           variant="outline"
@@ -212,7 +198,7 @@ function About() {
           { label: "Version", value: info?.version ?? "0.1.0 (preview)", mono: true },
           { label: "Settings file", value: info?.settingsFile ?? "—", mono: true },
           { label: "Data folder", value: info?.dataDir ?? "—", mono: true },
-          { label: "Workspace layout", value: "Trellis (non-commercial licence; see docs/DEPENDENCIES.md)" },
+          { label: "Workspace layout", value: "dockview (MIT)" },
         ]}
       />
     </Section>

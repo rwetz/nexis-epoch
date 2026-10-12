@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  dockview: 8.3.1
+  dockview-core: 8.3.1
+
 importers:
 
   .: {}
@@ -37,12 +41,6 @@ importers:
       '@codemirror/view':
         specifier: ^6.43.13
         version: 6.43.14
-      '@danfessler/trellis':
-        specifier: 0.3.0
-        version: 0.3.0
-      '@danfessler/trellis-react':
-        specifier: 0.3.0
-        version: 0.3.0(@danfessler/trellis@0.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@fontsource-variable/geist':
         specifier: ^5.3.0
         version: 5.3.0
@@ -85,6 +83,9 @@ importers:
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      dockview-react:
+        specifier: 8.3.1
+        version: 8.3.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       echarts:
         specifier: ^6.1.0
         version: 6.1.0
@@ -373,16 +374,6 @@ packages:
   '@csstools/css-tokenizer@4.0.2':
     resolution: {integrity: sha512-OoKoR0f76dCY666JlcbhmVTs2drYj1GUXZTYTcbUgJjh9Nv41aFfZ21bPQTERm5+L5cBDo466NltB2lplS5GBw==}
     engines: {node: '>=20.19.0'}
-
-  '@danfessler/trellis-react@0.3.0':
-    resolution: {integrity: sha512-hQtAuTbe8JVL8lIniLNbmEiKio1D6MgUnl6WxRZLJWvztFiKxkO/QjBsZ8SVbLD9MTmaw0m/ExTRKAZ0NMSp/Q==}
-    peerDependencies:
-      '@danfessler/trellis': ^0.3.0
-      react: '>=18.3'
-      react-dom: '>=18.3'
-
-  '@danfessler/trellis@0.3.0':
-    resolution: {integrity: sha512-pvlexewXbyws7/l7oXEJt8/pdb7c5IECV/10Hm/zMIy1Hn4CweyL2fBrygj4BjxX/bE9nGx0V1dbhRccWqiC/A==}
 
   '@dotenvx/dotenvx@1.75.1':
     resolution: {integrity: sha512-/BITOC9dmS/edY2zQwZNicQ059O6RKabtQfyEafV0nGtfYRNHYy1DIPiYVcov40+tob9hfmBnbR963dS+EQ1DQ==}
@@ -2064,6 +2055,18 @@ packages:
     resolution: {integrity: sha512-DPi0FmjiSU5EvQV0++GFDOJ9ASQUVFh5kD+OzOnYdi7n3Wpm9hWWGfB/O2blfHcMVTL5WkQXSnRiK9makhrcnw==}
     engines: {node: '>=0.3.1'}
 
+  dockview-core@8.3.1:
+    resolution: {integrity: sha512-6Loais9hlIRo25sTQSWGWlgbPr22ddoLBzpGDFaTnocawnC45twp5f2S2WxUz5/HPa/a65I4yxKUqZa8xrcc5Q==}
+
+  dockview-react@8.3.1:
+    resolution: {integrity: sha512-siezdOZ5izcdEn7TSYeWc+mC3hPgyW6rK6QHd6+L6PCRUKdB0WkGABtLtHmLn4Dr3VCm6C2+cv1qSCqJBeiFyA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  dockview@8.3.1:
+    resolution: {integrity: sha512-2odBC9cDKcVCVx8Db86vq9s9JZKzbgvdkxDzcfsrD9nORLc5UqhLgLvVcJguorBv7CyEpKDzFO1JVLYWJCYrJA==}
+
   dot-prop@6.0.1:
     resolution: {integrity: sha512-tE7ztYzXHIeyvc7N+hR3oi7FIbf/NIjVP9hmAt3yMXzrQ072/fpjGLx2GxNxGxUl5V73MEqYzioOMoVhGMJ5cA==}
     engines: {node: '>=10'}
@@ -3674,14 +3677,6 @@ snapshots:
 
   '@csstools/css-tokenizer@4.0.2': {}
 
-  '@danfessler/trellis-react@0.3.0(@danfessler/trellis@0.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
-    dependencies:
-      '@danfessler/trellis': 0.3.0
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
-
-  '@danfessler/trellis@0.3.0': {}
-
   '@dotenvx/dotenvx@1.75.1':
     dependencies:
       '@dotenvx/primitives': 0.8.0
@@ -5240,6 +5235,18 @@ snapshots:
   detect-node-es@1.1.0: {}
 
   diff@8.0.4: {}
+
+  dockview-core@8.3.1: {}
+
+  dockview-react@8.3.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+    dependencies:
+      dockview: 8.3.1
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+
+  dockview@8.3.1:
+    dependencies:
+      dockview-core: 8.3.1
 
   dot-prop@6.0.1:
     dependencies:

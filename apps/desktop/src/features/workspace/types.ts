@@ -2,8 +2,8 @@
  * The workspace contract, independent of the docking library.
  *
  * Panels, layouts and commands are described here in Epoch's own terms.
- * Only `features/workspace/trellis/` knows about Trellis; replacing it means
- * writing another adapter against these types, not touching any panel.
+ * Only `features/workspace/dockview/` knows about dockview; replacing it
+ * means writing another adapter against these types, not touching any panel.
  */
 import type * as React from "react";
 import type { IconName } from "@nexis/design";
@@ -70,7 +70,11 @@ export interface PanelHandle<P> {
   focused: boolean;
 }
 
-/** The neutral layout description used for workspace defaults. */
+/**
+ * The neutral layout description used for workspace defaults. A `stage`
+ * marks where documents go; adapters without such a region treat it as a
+ * plain group.
+ */
 export type LayoutNode =
   | { kind: "split"; axis: "row" | "column"; weights?: number[]; children: LayoutNode[] }
   | { kind: "panel"; views: LayoutView[]; selected?: number }
@@ -104,8 +108,9 @@ export interface WorkspaceApi {
   resetLayout(): Promise<boolean>;
   /** Maximize the focused panel, or restore it. */
   toggleZoom(): void;
-  /** Frame everything (leave any zoom). */
+  /** Leave any zoom. */
   overview(): void;
-  restoreHidden(): void;
+  /** Undock the focused panel into a floating window over the workspace. */
+  floatFocused(): void;
   closeFocused(): void;
 }

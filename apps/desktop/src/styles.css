@@ -2,7 +2,7 @@
  * own components (@source inside); src/ is scanned automatically. */
 @import "@nexis/design/styles/globals.ide.css";
 /* The docking layout's structural styles; its colours are remapped below. */
-@import "@danfessler/trellis/style.css";
+@import "dockview-react/dist/styles/dockview.css";
 
 /* App-specific rules only below this line. Anything general belongs
  * upstream in @nexis/design. */
@@ -30,32 +30,155 @@
   --series-5: #d55181;
 }
 
-/* ── Trellis ↔ @nexis/design ─────────────────────────────────────────────
- * Trellis declares its tokens under :where(), so this plain class wins and
- * every one of the 22 themes (and high contrast) reaches the workspace. */
-.trellis {
-  --trellis-font: var(--font-sans);
-  --trellis-font-size: 12px;
-  --trellis-gap: 5px;
-  --trellis-radius: 10px;
-  --trellis-tab-radius: 7px;
-  --trellis-tabbar-height: 32px;
-  --trellis-bg: var(--background);
-  --trellis-panel: var(--card);
-  --trellis-stage: color-mix(in oklab, var(--background) 88%, var(--card));
-  --trellis-tabbar: color-mix(in oklab, var(--card) 70%, var(--background));
-  --trellis-tab-active: var(--card);
-  --trellis-tab-hover: color-mix(in oklab, var(--foreground) 6%, transparent);
-  --trellis-text: var(--foreground);
-  --trellis-text-muted: var(--muted-foreground);
-  --trellis-border: var(--border);
-  --trellis-accent: var(--brand);
-  --trellis-accent-contrast: var(--brand-foreground);
-  --trellis-slot: color-mix(in oklab, var(--brand) 22%, transparent);
-  --trellis-menu: var(--popover);
-  --trellis-menu-hover: var(--accent);
-  --trellis-focus-ring: 0 0 0 1.5px var(--ring);
-  --trellis-ease: var(--ease-enter, cubic-bezier(0.22, 1, 0.36, 1));
+/* ── dockview ↔ @nexis/design ───────────────────────────────────────────
+ * The workspace theme (`className: "dockview-theme-epoch"` in the adapter).
+ * dockview themes are sets of --dv-* variables; these point at the design
+ * tokens, so every one of the 22 themes (and high contrast) reaches the
+ * workspace. Structural values follow dockview's own base themes. */
+.dockview-theme-epoch {
+  --dv-overlay-z-index: 999;
+  --dv-tabs-and-actions-container-font-size: 12px;
+  --dv-tabs-and-actions-container-height: 32px;
+  --dv-tab-font-size: 12px;
+  --dv-tab-margin: 4px 1px;
+  --dv-tab-border-radius: 7px;
+  --dv-tab-close-icon-size: inherit;
+  --dv-border-radius: 10px;
+  --dv-spacing-padding: 0px;
+  --dv-sash-color: transparent;
+  --dv-active-sash-color: var(--brand);
+  --dv-active-sash-transition-duration: 0.1s;
+  --dv-active-sash-transition-delay: 0.3s;
+  --dv-sash-border-radius: 3px;
+  --dv-dropdown-border-radius: 8px;
+  --dv-drag-over-border: none;
+  --dv-floating-group-dragging-opacity: 0.6;
+  --dv-floating-titlebar-height: 22px;
+  --dv-floating-group-border: 1px solid var(--border);
+  --dv-floating-border: 1px solid var(--border);
+  --dv-floating-titlebar-background-color: var(--dv-tabs-and-actions-container-background-color);
+  --dv-floating-titlebar-border-bottom: 1px solid var(--border);
+  --dv-floating-box-shadow: 0 18px 44px -10px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.2);
+  --dv-paneview-active-outline-color: var(--ring);
+
+  --dv-group-view-background-color: var(--card);
+  --dv-tabs-and-actions-container-background-color: color-mix(in oklab, var(--card) 70%, var(--background));
+  --dv-activegroup-visiblepanel-tab-background-color: var(--card);
+  --dv-activegroup-hiddenpanel-tab-background-color: transparent;
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--card);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: transparent;
+  --dv-activegroup-visiblepanel-tab-color: var(--foreground);
+  --dv-activegroup-hiddenpanel-tab-color: var(--muted-foreground);
+  --dv-inactivegroup-visiblepanel-tab-color: color-mix(in oklab, var(--foreground) 82%, transparent);
+  --dv-inactivegroup-hiddenpanel-tab-color: var(--muted-foreground);
+  --dv-tab-divider-color: transparent;
+  --dv-separator-border: transparent;
+  --dv-paneview-header-border-color: var(--border);
+  --dv-drag-over-background-color: color-mix(in oklab, var(--brand) 18%, transparent);
+  --dv-drag-over-border-color: var(--brand);
+  --dv-edge-dock-indicator-color: var(--brand);
+  --dv-icon-hover-background-color: var(--accent);
+  --dv-tabs-container-scrollbar-color: var(--border);
+  --dv-scrollbar-background-color: var(--border);
+  --dv-context-menu-background-color: var(--popover);
+  --dv-context-menu-color: var(--popover-foreground);
+
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+/* Gaps between groups show a surface just off the cards; groups are
+ * rounded cards with a hairline edge. In dark themes the card already sits
+ * above the background, so the gap is the background itself; in light
+ * themes card and background are often both white, so the gap is tinted.
+ * (dockview resets `outline` on groups, so the edge is an overlay.) */
+.epoch-workspace {
+  --epoch-gap-surface: color-mix(in oklab, var(--background) 94%, var(--foreground));
+  background-color: var(--epoch-gap-surface);
+}
+.dark .epoch-workspace {
+  --epoch-gap-surface: var(--background);
+}
+.dockview-theme-epoch .dv-dockview,
+.dockview-theme-epoch.dv-dockview {
+  background-color: var(--epoch-gap-surface);
+}
+.dockview-theme-epoch .dv-groupview {
+  position: relative;
+  border-radius: var(--dv-border-radius);
+  overflow: hidden;
+}
+/* Drawn above the group's own children (an inset shadow on the group would
+ * sit under the tab bar and content), and never in the way of the pointer. */
+.dockview-theme-epoch .dv-groupview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--border) 80%, transparent);
+  pointer-events: none;
+}
+.dockview-theme-epoch .dv-groupview.dv-active-group::after {
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+/* The selected tab of the focused group carries the one accent. */
+.dockview-theme-epoch .dv-groupview.dv-active-group .dv-tab.dv-active-tab {
+  box-shadow: inset 0 2px 0 var(--brand);
+}
+.dockview-theme-epoch .dv-tab:not(.dv-active-tab):hover {
+  background-color: color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+.dockview-theme-epoch .dv-resize-container {
+  border-radius: var(--dv-border-radius);
+}
+
+/* Epoch's tab (EpochTab): icon, title, and a close button that shows a dot
+ * while the panel has unsaved changes (the dot becomes the × on hover). */
+.epoch-tab {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  max-width: 220px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px 0 10px;
+}
+.epoch-tab-close {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  opacity: 0;
+}
+.epoch-tab-close > * {
+  grid-area: 1 / 1;
+}
+.dv-tab:hover .epoch-tab-close,
+.dv-active-tab .epoch-tab-close,
+.epoch-tab-close.is-dirty {
+  opacity: 1;
+}
+.epoch-tab-close:hover {
+  background-color: var(--accent);
+}
+.epoch-tab-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background-color: currentColor;
+  visibility: hidden;
+}
+.epoch-tab-close.is-dirty .epoch-tab-dot {
+  visibility: visible;
+}
+.epoch-tab-close.is-dirty .epoch-tab-x,
+.epoch-tab-close.is-dirty:hover .epoch-tab-dot {
+  visibility: hidden;
+}
+.epoch-tab-close.is-dirty:hover .epoch-tab-x {
+  visibility: visible;
 }
 
 /* Panel bodies own their scrolling; the view surface should not add any. */
