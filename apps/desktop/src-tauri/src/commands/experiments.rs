@@ -56,7 +56,8 @@ pub async fn experiment_detail(
 ) -> CmdResult<RunDetail> {
     let state = state.inner().clone();
     blocking(move || {
-        let (run, project_dir) = locate_run(&state.project()?, &run_dir)?;
+        let project = state.project()?;
+        let (run, project_dir) = locate_run(&project, &run_dir)?;
         Ok(run_store::read_run_detail(&project_dir, &run)?)
     })
     .await
@@ -71,7 +72,8 @@ pub async fn experiment_artifact(
 ) -> CmdResult<serde_json::Value> {
     let state = state.inner().clone();
     blocking(move || {
-        let (run, _) = locate_run(&state.project()?, &run_dir)?;
+        let project = state.project()?;
+        let (run, _) = locate_run(&project, &run_dir)?;
         Ok(run_store::read_artifact_json(&run, &path)?)
     })
     .await
