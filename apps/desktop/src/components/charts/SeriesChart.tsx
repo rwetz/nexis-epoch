@@ -31,9 +31,21 @@ export function SeriesChart({
     const many = series.length > 1;
     return {
       ...baseOption(t),
-      grid: { left: 8, right: many && series.length <= 4 ? 64 : 16, top: many ? 30 : 12, bottom: 26, containLabel: true },
+      grid: { left: 8, right: 16, top: many ? 30 : 12, bottom: 22, containLabel: true },
+      // One scrollable row, so a long legend never sits on the plot.
       legend: many
-        ? { top: 0, left: 0, itemWidth: 14, itemHeight: 2, icon: "rect", textStyle: { color: t.muted, fontSize: 11 } }
+        ? {
+            type: "scroll",
+            top: 0,
+            left: 0,
+            right: 0,
+            itemWidth: 14,
+            itemHeight: 2,
+            icon: "rect",
+            textStyle: { color: t.muted, fontSize: 11 },
+            pageIconColor: t.muted,
+            pageTextStyle: { color: t.muted },
+          }
         : undefined,
       tooltip: {
         ...(baseOption(t).tooltip as object),
@@ -43,11 +55,11 @@ export function SeriesChart({
       },
       xAxis: {
         type: "value",
-        name: xLabel,
-        nameLocation: "end",
-        nameGap: 6,
-        nameTextStyle: { color: t.muted, fontSize: 10, align: "right", verticalAlign: "top", padding: [8, 0, 0, 0] },
         scale: true,
+        name: xLabel,
+        nameLocation: "middle",
+        nameGap: 20,
+        nameTextStyle: { color: t.muted, fontSize: 10 },
         axisLine: { lineStyle: { color: t.axis } },
         axisTick: { show: false },
         axisLabel: { color: t.muted, fontSize: 10, hideOverlap: true },
@@ -73,11 +85,6 @@ export function SeriesChart({
           lineStyle: { width: 2, color },
           itemStyle: { color, borderColor: t.surface, borderWidth: 2 },
           emphasis: { focus: "series" },
-          // Direct labels at the line end when there are few lines.
-          endLabel:
-            many && series.length <= 4
-              ? { show: true, color: t.muted, fontSize: 10, formatter: (p: { value: [number, number] }) => formatMetric(p.value[1]) }
-              : undefined,
           sampling: "lttb",
         };
       }),

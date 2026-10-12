@@ -37,7 +37,7 @@ export function MatrixChart({
     const showLabels = rows.length * columns.length <= 400;
     return {
       ...baseOption(t),
-      grid: { left: 8, right: 8, top: 20, bottom: 28, containLabel: true },
+      grid: { left: 28, right: 8, top: 8, bottom: 28, containLabel: true },
       tooltip: {
         ...(baseOption(t).tooltip as object),
         formatter: (p: { value: [number, number, number] }) =>
@@ -59,8 +59,10 @@ export function MatrixChart({
         data: rows,
         inverse: true,
         name: rowName,
-        nameLocation: "end",
-        nameTextStyle: { color: t.muted, fontSize: 10, align: "right" },
+        nameLocation: "middle",
+        nameRotate: 90,
+        nameGap: 24,
+        nameTextStyle: { color: t.muted, fontSize: 10 },
         axisLabel: { color: t.muted, fontSize: 10 },
         axisLine: { show: false },
         axisTick: { show: false },
