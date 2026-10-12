@@ -19,7 +19,10 @@ fn reads_a_real_project() {
     };
     let root = ProjectRoot::open(&dir).expect("project folder");
     let summary = detect(&root);
-    assert!(!summary.experiment_stores.is_empty(), "no .nexis-ml/runs found");
+    assert!(
+        !summary.experiment_stores.is_empty(),
+        "no .nexis-ml/runs found"
+    );
 
     let runs = list_runs(root.path()).expect("runs");
     assert!(!runs.is_empty());
@@ -27,13 +30,27 @@ fn reads_a_real_project() {
     for run in &runs {
         let detail = read_run_detail(root.path(), std::path::Path::new(&run.dir)).expect("detail");
         if run.status == "ok" {
-            assert!(!detail.series.is_empty(), "{}: finished run without metrics", run.id);
+            assert!(
+                !detail.series.is_empty(),
+                "{}: finished run without metrics",
+                run.id
+            );
         }
-        for artifact in detail.artifacts.iter().filter(|a| a.kind == "confusion-matrix") {
-            let rel = artifact.path.as_deref().expect("artifact rebased into the run");
+        for artifact in detail
+            .artifacts
+            .iter()
+            .filter(|a| a.kind == "confusion-matrix")
+        {
+            let rel = artifact
+                .path
+                .as_deref()
+                .expect("artifact rebased into the run");
             assert!(artifact.exists, "{}: {rel} missing", run.id);
             let cm = read_artifact_json(std::path::Path::new(&run.dir), rel).expect("readable");
-            assert!(cm["matrix"].is_array() && cm["labels"].is_array(), "{rel}: {cm}");
+            assert!(
+                cm["matrix"].is_array() && cm["labels"].is_array(),
+                "{rel}: {cm}"
+            );
         }
         checked += 1;
     }
