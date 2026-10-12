@@ -33,10 +33,14 @@ Lab experiments directly, but it is a standalone app.
 | **Shell** | Title bar with project, workspace switcher, search (Ctrl/⌘+P: files + commands), command palette (Ctrl/⌘+Shift+P, ~60 commands), collapsible sidebar, status bar (project, Python env, backend, running queries, CPU/memory, NVIDIA GPU when `nvidia-smi` exists), 22 themes × light/dark × high contrast. | Browser render in two themes and both modes |
 | **Settings** | Data limits (page size, row limit, timeout, memory, threads), Python interpreter, hidden files, index-on-open; saved to `settings.toml` keeping your comments; appearance; workspace navigation; forget saved layouts. | Rust tests (round trip, per-field fallback, comment preservation) |
 
-**Not yet verified in the running desktop app.** Everything above was
-checked by tests and by rendering the frontend in a browser (where the Rust
-backend is unavailable). The first desktop build runs in CI; see "Status of
-the desktop build" below.
+**Checked in the release app (Windows).** The CI-built `nexis-epoch.exe` was
+driven end to end through WebView2's DevTools port against a copy of a real
+Nexis ML project plus generated data: open project, 50,000-row Parquet
+preview, sort, filter, statistics, SQL over a view, two sandbox escape
+attempts, a structured TOML edit saved to disk with comments intact, a syntax
+error, 18 imported runs, a 3-run metric overlay, a confusion matrix, and
+layout persistence. The folder picker itself was not clicked (the test calls
+the same backend command).
 
 ## What doesn't exist yet
 
@@ -72,9 +76,9 @@ More: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 | Platform | Built | Run by hand |
 |---|---|---|
-| Windows | CI | not yet |
-| Linux | CI | not yet |
-| macOS | CI | not yet |
+| Windows | CI (.msi, .exe installer) | release build tested end to end (see above) |
+| Linux | CI (.deb, .AppImage) | not yet |
+| macOS | CI (.dmg) | not yet |
 
 ## How it is built
 
