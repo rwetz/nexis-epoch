@@ -1,0 +1,8 @@
+node_modules/
+dist/
+target/
+apps/desktop/public/cursors/
+apps/desktop/src-tauri/gen/
+*.tmp
+.DS_Store
+coverage/

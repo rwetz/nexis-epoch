@@ -1,0 +1,21 @@
+[package]
+name = "epoch-config"
+description = "TOML for Epoch: parsing with diagnostics, a structured tree, format-preserving edits, and the app's own settings file."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+epoch-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+toml_edit.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

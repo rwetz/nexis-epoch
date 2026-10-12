@@ -1,0 +1,32 @@
+[package]
+name = "epoch-data"
+description = "Local analytical queries over project datasets with DuckDB: schema, paged previews, statistics and sandboxed ad-hoc SQL."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+# Linking DuckDB, two ways:
+#
+# - `bundled` compiles DuckDB (C++) into the binary. Slow — several minutes
+#   of full CPU — so it is what CI and release builds use.
+# - Otherwise, set DUCKDB_DOWNLOAD_LIB=1 and libduckdb-sys downloads the
+#   official prebuilt library for this DuckDB version from DuckDB's GitHub
+#   releases into target/duckdb-download/. `pnpm tauri:dev` does this for you.
+[features]
+default = []
+bundled = ["duckdb/bundled", "duckdb/parquet", "duckdb/json"]
+
+[dependencies]
+epoch-core.workspace = true
+duckdb.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

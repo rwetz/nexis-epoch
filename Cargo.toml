@@ -1,0 +1,49 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/epoch-core",
+    "crates/epoch-config",
+    "crates/epoch-store",
+    "crates/epoch-data",
+    "crates/epoch-runtime",
+    "apps/desktop/src-tauri",
+]
+# The desktop crate pulls in Tauri and DuckDB; `cargo test` at the root runs
+# only the library crates, which build without either.
+default-members = [
+    "crates/epoch-core",
+    "crates/epoch-config",
+    "crates/epoch-store",
+    "crates/epoch-runtime",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+authors = ["Ryan Wetzstein"]
+repository = "https://github.com/rwetz/nexis-epoch"
+
+[workspace.dependencies]
+epoch-core = { path = "crates/epoch-core" }
+epoch-config = { path = "crates/epoch-config" }
+epoch-store = { path = "crates/epoch-store" }
+epoch-data = { path = "crates/epoch-data" }
+epoch-runtime = { path = "crates/epoch-runtime" }
+
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+thiserror = "2.0.21"
+dunce = "1.0.5"
+toml_edit = "0.25"
+rusqlite = { version = "0.40.2", features = ["bundled"] }
+# DuckDB 1.5.5. Linking: see crates/epoch-data/Cargo.toml.
+duckdb = { version = "=1.10505.0", default-features = false }
+tokio = { version = "1.53.1", default-features = false }
+tempfile = "3.27.0"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }

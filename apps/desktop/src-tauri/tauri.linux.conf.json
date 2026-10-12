@@ -1,0 +1,5 @@
+{
+  "app": {
+    "windows": [{ "label": "main", "title": "Epoch", "width": 1440, "height": 900, "minWidth": 960, "minHeight": 600, "visible": false, "decorations": false, "transparent": true, "shadow": false }]
+  }
+}

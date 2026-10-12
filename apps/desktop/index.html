@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Epoch</title>
+    <script>
+      // No-flash bootstrap (docs/SCAFFOLDING.md step 5). The key is the
+      // ThemeProvider's storageKey + ":mode".
+      (function () {
+        try {
+          var m = localStorage.getItem("nexis-epoch:mode") || "system";
+          var dark = m === "dark" || (m === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.add(dark ? "dark" : "light");
+          document.documentElement.style.backgroundColor = dark ? "oklch(0.148 0.004 228.8)" : "#fff";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

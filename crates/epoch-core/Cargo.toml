@@ -1,0 +1,21 @@
+[package]
+name = "epoch-core"
+description = "Epoch's framework-free foundation: safe project paths, project detection, file listing, atomic writes, and the Nexis ML run-store format."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+dunce.workspace = true
+toml_edit.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

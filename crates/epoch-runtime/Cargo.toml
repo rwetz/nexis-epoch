@@ -1,0 +1,17 @@
+[package]
+name = "epoch-runtime"
+description = "Interfaces for running training jobs outside the UI process: job specs, command plans, events and the runtime trait."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+epoch-core.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+
+[lints]
+workspace = true

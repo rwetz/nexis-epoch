@@ -1,0 +1,7 @@
+packages:
+  - apps/*
+
+# pnpm >= 11 ignores package.json's onlyBuiltDependencies and asks here
+# instead (@nexis/design docs/PITFALLS.md §6); without it esbuild never installs.
+allowBuilds:
+  esbuild: true

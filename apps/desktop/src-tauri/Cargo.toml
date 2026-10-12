@@ -1,0 +1,37 @@
+[package]
+name = "epoch-desktop"
+description = "Nexis Epoch desktop shell: Tauri commands that expose the epoch-* crates to the webview."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+name = "epoch_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+# Compile DuckDB from source (CI / release). Without it, set
+# DUCKDB_DOWNLOAD_LIB=1 (see crates/epoch-data/Cargo.toml).
+bundled-duckdb = ["epoch-data/bundled"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.0", features = [] }
+
+[dependencies]
+epoch-core.workspace = true
+epoch-config.workspace = true
+epoch-store.workspace = true
+epoch-data.workspace = true
+epoch-runtime.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tauri = { version = "2.12.0", features = [] }
+tauri-plugin-dialog = "2.8.0"
+tauri-plugin-os = "2.4.0"
+sysinfo = { version = "0.39.6", default-features = false, features = ["system"] }
+
+[lints]
+workspace = true

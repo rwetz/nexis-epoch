@@ -1,0 +1,88 @@
+/* The design system, with the editor additions (CodeMirror). It scans its
+ * own components (@source inside); src/ is scanned automatically. */
+@import "@nexis/design/styles/globals.ide.css";
+/* The docking layout's structural styles; its colours are remapped below. */
+@import "@danfessler/trellis/style.css";
+
+/* App-specific rules only below this line. Anything general belongs
+ * upstream in @nexis/design. */
+
+/* ── Series colours ─────────────────────────────────────────────────────
+ * Categorical identity for chart series (runs, metrics). The theme's own
+ * --chart-1..5 are a neutral ramp — right for magnitude, wrong for telling
+ * runs apart — and its saturated hues are taken by status (success,
+ * warning, info, destructive). These five are the dataviz reference
+ * palette's first slots, in its CVD-safe order, validated on Epoch's card
+ * surfaces in both modes (docs/ARCHITECTURE.md, "Charts"). Fixed across
+ * themes on purpose: a run keeps its colour when the theme changes. */
+:root {
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+}
+.dark {
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+}
+
+/* ── Trellis ↔ @nexis/design ─────────────────────────────────────────────
+ * Trellis declares its tokens under :where(), so this plain class wins and
+ * every one of the 22 themes (and high contrast) reaches the workspace. */
+.trellis {
+  --trellis-font: var(--font-sans);
+  --trellis-font-size: 12px;
+  --trellis-gap: 5px;
+  --trellis-radius: 10px;
+  --trellis-tab-radius: 7px;
+  --trellis-tabbar-height: 32px;
+  --trellis-bg: var(--background);
+  --trellis-panel: var(--card);
+  --trellis-stage: color-mix(in oklab, var(--background) 88%, var(--card));
+  --trellis-tabbar: color-mix(in oklab, var(--card) 70%, var(--background));
+  --trellis-tab-active: var(--card);
+  --trellis-tab-hover: color-mix(in oklab, var(--foreground) 6%, transparent);
+  --trellis-text: var(--foreground);
+  --trellis-text-muted: var(--muted-foreground);
+  --trellis-border: var(--border);
+  --trellis-accent: var(--brand);
+  --trellis-accent-contrast: var(--brand-foreground);
+  --trellis-slot: color-mix(in oklab, var(--brand) 22%, transparent);
+  --trellis-menu: var(--popover);
+  --trellis-menu-hover: var(--accent);
+  --trellis-focus-ring: 0 0 0 1.5px var(--ring);
+  --trellis-ease: var(--ease-enter, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+/* Panel bodies own their scrolling; the view surface should not add any. */
+.epoch-panel {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  background: var(--card);
+  color: var(--card-foreground);
+}
+
+/* Inactive workspaces stay mounted (their panels keep state) but are
+ * taken out of view and out of the tab order. */
+.epoch-workspace[data-active="false"] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* CodeMirror fills its panel. */
+.epoch-editor .cm-editor {
+  height: 100%;
+  font-size: 12.5px;
+}
+.epoch-editor .cm-editor.cm-focused {
+  outline: none;
+}
+.epoch-editor .cm-scroller {
+  font-family: var(--font-mono);
+}
