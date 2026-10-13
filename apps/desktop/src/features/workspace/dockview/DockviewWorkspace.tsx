@@ -31,11 +31,21 @@ import { PanelContext } from "../panel-context";
 import type { PanelDefinition, PanelHandle, WorkspaceApi, WorkspacePreset } from "../types";
 import { presetDocument } from "./document";
 
-/** Close guards by panel id, consulted by every close path. */
+/**
+ * Panel ids from presets are only unique within a workspace (Studio and
+ * Config each have a `toml-editor-1`), so app-wide state about a panel —
+ * unsaved changes, close guards — is keyed by workspace and panel.
+ */
+const WorkspaceIdContext = React.createContext<string>("");
+export function panelKey(workspace: string, panelId: string): string {
+  return `${workspace}:${panelId}`;
+}
+
+/** Close guards by panel key, consulted by every close path. */
 const guards = new Map<string, () => boolean | Promise<boolean>>();
 
-async function requestClose(api: DockviewPanelApi): Promise<boolean> {
-  const guard = guards.get(api.id);
+async function requestClose(workspace: string, api: DockviewPanelApi): Promise<boolean> {
+  const guard = guards.get(panelKey(workspace, api.id));
   if (guard && !(await guard())) return false;
   api.close();
   return true;
@@ -52,6 +62,7 @@ function useDockviewEvent<T>(subscribe: (listener: (e: T) => void) => { dispose(
 
 function PanelBridge({ def, props }: { def: PanelDefinition; props: IDockviewPanelProps }) {
   const { api } = props;
+  const key = panelKey(React.useContext(WorkspaceIdContext), api.id);
   const setDirtyGlobal = useApp((s) => s.setDirty);
   const [visible, setVisible] = React.useState(api.isVisible);
   const [focused, setFocused] = React.useState(api.isActive);
@@ -69,10 +80,10 @@ function PanelBridge({ def, props }: { def: PanelDefinition; props: IDockviewPan
 
   React.useEffect(
     () => () => {
-      guards.delete(api.id);
-      setDirtyGlobal(api.id, false);
+      guards.delete(key);
+      setDirtyGlobal(key, false);
     },
-    [api.id, setDirtyGlobal],
+    [key, setDirtyGlobal],
   );
 
   const handle = React.useMemo<PanelHandle<object>>(
@@ -81,15 +92,15 @@ function PanelBridge({ def, props }: { def: PanelDefinition; props: IDockviewPan
       type: def.type,
       params,
       setParams: (patch) => api.updateParameters({ ...api.getParameters(), ...patch }),
-      setDirty: (d) => setDirtyGlobal(api.id, d),
+      setDirty: (d) => setDirtyGlobal(key, d),
       setCloseGuard: (g) => {
-        if (g) guards.set(api.id, g);
-        else guards.delete(api.id);
+        if (g) guards.set(key, g);
+        else guards.delete(key);
       },
       visible,
       focused,
     }),
-    [api, def, params, visible, focused, setDirtyGlobal],
+    [api, key, def, params, visible, focused, setDirtyGlobal],
   );
 
   const Component = def.component;
@@ -106,12 +117,13 @@ function PanelBridge({ def, props }: { def: PanelDefinition; props: IDockviewPan
 
 /** A tab: the panel's icon and title, a dot for unsaved work, a guarded close. */
 function EpochTab({ api }: IDockviewPanelHeaderProps) {
+  const workspace = React.useContext(WorkspaceIdContext);
   const def = getPanel(api.component);
   const [title, setTitle] = React.useState(api.title ?? def?.title ?? "");
   useDockviewEvent(api.onDidTitleChange, (e) => setTitle(e.title));
-  const dirty = useApp((s) => !!s.dirty[api.id]);
+  const dirty = useApp((s) => !!s.dirty[panelKey(workspace, api.id)]);
   return (
-    <div className="epoch-tab" title={title} onAuxClick={(e) => e.button === 1 && void requestClose(api)}>
+    <div className="epoch-tab" title={title} onAuxClick={(e) => e.button === 1 && void requestClose(workspace, api)}>
       {def && <Icon name={def.icon} size="xs" className="shrink-0 opacity-80" />}
       <span className="truncate">{title}</span>
       <button
@@ -122,7 +134,7 @@ function EpochTab({ api }: IDockviewPanelHeaderProps) {
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
-          void requestClose(api);
+          void requestClose(workspace, api);
         }}
       >
         <span aria-hidden className="epoch-tab-dot" />
@@ -166,7 +178,7 @@ export function DockviewWorkspace({ preset, initialDocument, onDocumentChange, o
   const makeWorkspaceApi = (api: DockviewApi): WorkspaceApi => {
     const dirtyHere = () => {
       const dirty = useApp.getState().dirty;
-      return api.panels.filter((p) => dirty[p.id]);
+      return api.panels.filter((p) => dirty[panelKey(preset.id, p.id)]);
     };
     return {
       id: preset.id,
@@ -228,7 +240,7 @@ export function DockviewWorkspace({ preset, initialDocument, onDocumentChange, o
         if (api.activePanel) api.addFloatingGroup(api.activePanel);
       },
       closeFocused() {
-        if (api.activePanel) void requestClose(api.activePanel.api);
+        if (api.activePanel) void requestClose(preset.id, api.activePanel.api);
       },
     };
   };
@@ -277,6 +289,7 @@ export function DockviewWorkspace({ preset, initialDocument, onDocumentChange, o
   );
 
   return (
+    <WorkspaceIdContext.Provider value={preset.id}>
     <DockviewReact
       className="h-full w-full"
       components={components}
@@ -287,5 +300,6 @@ export function DockviewWorkspace({ preset, initialDocument, onDocumentChange, o
       // grids and charts don't lose state (or scroll) on a tab switch.
       defaultRenderer="always"
     />
+    </WorkspaceIdContext.Provider>
   );
 }

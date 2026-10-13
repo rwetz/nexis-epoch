@@ -195,6 +195,9 @@
  * taken out of view and out of the tab order. */
 .epoch-workspace[data-active="false"] {
   visibility: hidden;
+  /* dockview sets `visibility: visible` on its own views, which overrides
+   * the inherited value; opacity can't be overridden by a descendant. */
+  opacity: 0;
   pointer-events: none;
 }
 
