@@ -3,31 +3,28 @@
 Versions were chosen from releases at least two weeks old at scaffold time
 (October 2026), except where noted.
 
-## Trellis UI (workspace layout) — licence warning
+## dockview (workspace layout)
 
 | | |
 |---|---|
-| Package | `@danfessler/trellis-react` 0.3.0 + `@danfessler/trellis` 0.3.0 (Dan Fessler, [github.com/DanFessler/trellis](https://github.com/DanFessler/trellis)) |
-| What it gives Epoch | Splits, tab groups, docking, floating, hiding, focus/free zoom navigation, a serialisable `LayoutDocument`, content that stays mounted while panels move |
-| Maturity | First published 26 Sep 2026; 0.3.0 was ~2 weeks old when adopted (a few hours short of Epoch's usual two-week bar — taken because the docs describe 0.3) |
-| **Licence** | **Not open source.** Three tiers: free for **non-commercial** use; **commercial** use by teams of ≤10 developers requires an active GitHub Sponsorship at the required tier; larger organisations need an enterprise licence (`LICENSE.md` in the package). |
+| Package | `dockview-react` 8.3.1 (with `dockview` and `dockview-core` held to 8.3.1 by a pnpm override), [dockview.dev](https://dockview.dev) |
+| Licence | **MIT** for everything Epoch uses |
+| What it gives Epoch | Splits, tab groups, drag-to-dock, floating windows, maximize, serialisable layouts, panels kept alive while they move |
+| Not used | `dockview-enterprise` (separately licensed): auto-hide edge groups, keyboard docking/navigation, undo/redo history, pinned and multi-row tabs, smart guides, DnD compass, advanced overflow. None is installed; the free core loads its free modules (floating groups, popouts, context menu, …) by default. |
 
-**Implications.** Epoch as a personal/non-commercial project may use Trellis
-freely. Selling Epoch, using it inside a company, or shipping it as part of a
-paid product requires a Trellis licence for as long as it is used. Because of
-this the layout is isolated behind an adapter:
-`apps/desktop/src/features/workspace/trellis/` is the only code that imports
-it. Panels, presets, persistence and commands use Epoch's own types, and the
-saved-layout envelope records the adapter, so a layout from another adapter
-is never misread. Open-source replacements to evaluate if needed:
-`dockview` (MIT), `flexlayout-react` (ISC), `rc-dock` (Apache-2.0); none
-offers Trellis's zoomable nesting.
+`dockview-react` really does re-export the core at runtime (verified in its
+bundle, unlike Trellis below), so all imports come from one package.
 
-**Found while integrating:** the React package's type declarations say
-`export * from '@danfessler/trellis'`, but its JavaScript re-exports only
-`createDocument`, `layout` and `formatCombo`. `sanitize` (and other core
-functions) must be imported from `@danfessler/trellis` directly, or the build
-fails. Worth reporting upstream.
+### History: Trellis (0.1.0)
+
+Epoch 0.1.0 used Trellis (`@danfessler/trellis-react` 0.3.0), which is
+**source-available, not open source**: free for non-commercial use only,
+with commercial use requiring a GitHub Sponsorship or an enterprise licence.
+0.2.0 replaced it with dockview so Epoch carries no use restriction. What
+was given up: zooming into nested *groups* (dockview maximizes one group at
+a time), hiding panels, and free/gesture navigation. Found while
+integrating it: its React package's typings claim to re-export the core but
+its JavaScript doesn't.
 
 ## Deviations from the brief's stack, and why
 

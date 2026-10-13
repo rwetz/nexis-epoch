@@ -29,7 +29,7 @@ Lab experiments directly, but it is a standalone app.
 | **Experiments** | Imports Nexis ML runs (`.nexis-ml/runs`, both engines) read-only into a rebuildable SQLite index; list, filter, focus and compare up to 5 runs. | Rust tests + a test run against two real projects (19 runs) |
 | **Training metrics** | Every recorded metric as its own chart (small multiples), overlaid across selected runs, spike-preserving decimation; pin a panel to one run. | Typecheck + browser render; charts not yet seen with real data in the app |
 | **Logs / Model inspector** | A run's log (level filter, search), generated-text samples, configuration snapshot, checkpoints, per-epoch confusion matrices with an epoch slider. | Same as above |
-| **Workspace** | Five workspaces (Studio, Data, Experiments, Models, Config) built from a central panel registry; split, tab, dock, float, hide, zoom; multiple instances of a panel; layouts saved per workspace in a versioned format with migrations; reset to default. | Unit tests (migrations, registry, presets); save → reload → restore checked in a browser |
+| **Workspace** | Five workspaces (Studio, Data, Experiments, Models, Config) built from a central panel registry (dockview, MIT); split, tab, drag to dock, float, maximize; multiple instances of a panel; layouts saved per workspace in a versioned format with migrations; reset to default. | Unit tests (migrations, registry, presets); save → reload → restore checked in a browser |
 | **Shell** | Title bar with project, workspace switcher, search (Ctrl/⌘+P: files + commands), command palette (Ctrl/⌘+Shift+P, ~60 commands), collapsible sidebar, status bar (project, Python env, backend, running queries, CPU/memory, NVIDIA GPU when `nvidia-smi` exists), 22 themes × light/dark × high contrast. | Browser render in two themes and both modes |
 | **Settings** | Data limits (page size, row limit, timeout, memory, threads), Python interpreter, hidden files, index-on-open; saved to `settings.toml` keeping your comments; appearance; workspace navigation; forget saved layouts. | Rust tests (round trip, per-field fallback, comment preservation) |
 
@@ -83,7 +83,7 @@ More: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 ## How it is built
 
 Tauri 2 · React 19 · TypeScript (strict) · Vite · Tailwind 4 ·
-@nexis/design · Trellis (workspace) · CodeMirror 6 · TanStack Table/Virtual ·
+@nexis/design · dockview (workspace) · CodeMirror 6 · TanStack Table/Virtual ·
 ECharts · Rust (DuckDB, SQLite, toml_edit).
 
 ```
@@ -103,8 +103,7 @@ the dependency checks and trade-offs.
 
 ## Licensing note
 
-The workspace layout library, **Trellis, is free for non-commercial use
-only**; commercial use requires a sponsorship or enterprise licence from its
-author. Epoch isolates it behind an adapter so it can be replaced. Details in
-[docs/DEPENDENCIES.md](docs/DEPENDENCIES.md). Epoch itself has no licence
-file yet.
+Every dependency Epoch ships is under an open-source licence (MIT, Apache-2.0
+and similar; see [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md)). The workspace
+layout uses dockview's MIT core; 0.1.0's non-commercial Trellis dependency was
+replaced in 0.2.0. Epoch itself has no licence file yet.

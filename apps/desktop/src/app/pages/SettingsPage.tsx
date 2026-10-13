@@ -195,7 +195,7 @@ function About() {
     <Section title="About">
       <PropertyList
         items={[
-          { label: "Version", value: info?.version ?? "0.1.0 (preview)", mono: true },
+          { label: "Version", value: info?.version ?? "browser preview", mono: true },
           { label: "Settings file", value: info?.settingsFile ?? "—", mono: true },
           { label: "Data folder", value: info?.dataDir ?? "—", mono: true },
           { label: "Workspace layout", value: "dockview (MIT)" },

@@ -90,7 +90,9 @@ its visible range; `PageCache` fetches pages on demand and keeps at most 24
 
 ## Workspace
 
-The workspace is Epoch's own model, with Trellis as the current renderer.
+The workspace is Epoch's own model, with [dockview](https://dockview.dev)
+(MIT) as the current renderer. Epoch 0.1.0 used Trellis; the swap touched
+only the adapter folder, as this design intends.
 
 - `features/workspace/types.ts`: panel type ids (stable; saved layouts refer
   to them), typed params per panel, `PanelHandle` (what a panel can do about
@@ -98,12 +100,19 @@ The workspace is Epoch's own model, with Trellis as the current renderer.
 - `registry.ts`: every panel type is registered once (`features/panels.ts`);
   the shell, palette and adapter read the registry. Each definition owns
   `parseParams`, which repairs params from saved layouts.
-- `trellis/TrellisWorkspace.tsx`: **the only module that imports Trellis.**
-  It maps definitions to Trellis view types, presets to documents, and view
-  handles to `PanelHandle`. Replacing Trellis means rewriting this folder.
-- Panels use `usePanel(type)` and never see the layout library. Content stays
-  mounted while panels move, tab, float, hide or zoom, so their state
-  survives rearranging; workspaces stay mounted after first use.
+- `dockview/`: **the only code that imports dockview.** `document.ts` turns
+  presets into dockview documents and repairs saved ones (pure, unit-tested);
+  `DockviewWorkspace.tsx` maps definitions to dockview components, dockview's
+  panel API to `PanelHandle`, and draws Epoch's tabs (icon, unsaved-changes
+  dot, a close button that runs the panel's close guard). Replacing dockview
+  means rewriting this folder.
+- Panels use `usePanel(type)` and never see the layout library. dockview's
+  `defaultRenderer: "always"` keeps every panel's DOM alive as a hidden tab,
+  and panels keep their React state while they move between groups or float,
+  so state survives rearranging; workspaces stay mounted after first use.
+- What the layout offers: splits, tab groups, drag-to-dock, floating
+  windows, maximize (zoom one group), close, reset. Only dockview's free
+  core is used; its paid `dockview-enterprise` modules are not installed.
 - Five workspaces (Studio, Data, Experiments, Models, Config), each with its
   own saved layout. Multiple instances of a panel type are allowed; the
   experiment panels can be pinned to a run or follow the selection.
@@ -112,16 +121,17 @@ The workspace is Epoch's own model, with Trellis as the current renderer.
 `<app data>/layouts/<id>.json`:
 
 ```json
-{ "schema": 1, "workspace": "studio", "adapter": "trellis",
-  "presetVersion": 1, "savedAt": "…", "document": { …Trellis LayoutDocument… } }
+{ "schema": 1, "workspace": "studio", "adapter": "dockview",
+  "presetVersion": 1, "savedAt": "…", "document": { …dockview SerializedDockview… } }
 ```
 
 Loading runs `migrateLayout`: each schema bump adds a function to
 `MIGRATIONS` that upgrades the previous shape, and the chain runs from the
-stored version up. Schema 0 (a bare Trellis document) is accepted, which
-also lets a layout exported from Trellis be imported. A layout from a newer
-Epoch, another workspace or another adapter is refused, and the preset is
-used instead. Unknown panel types are dropped and params repaired
+stored version up. Schema 0 (a bare dockview document, as `api.toJSON()`
+returns it) is accepted, which also lets an exported dockview layout be
+imported. A layout from a newer Epoch, another workspace or another adapter
+(0.1.0's `trellis` layouts) is refused with a notice, and the preset is used
+instead. Unknown panel types are dropped and params repaired
 (`repairDocument`). Saves are debounced (400 ms) and atomic.
 
 ## Frontend/backend contract

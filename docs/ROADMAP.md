@@ -61,6 +61,5 @@ The point at which Epoch stops being read-only.
 
 ## Housekeeping
 
-- Report the `trellis-react` re-export typing bug upstream.
-- Decide Trellis licensing before any commercial use (docs/DEPENDENCIES.md).
+- Choose a licence for Epoch itself (it has none yet).
 - macOS and Linux hand-testing; code signing for releases.

@@ -5,7 +5,7 @@ Read `docs/ARCHITECTURE.md` first; it is short.
 - **UI rules** come from @nexis/design: read
   `apps/desktop/node_modules/@nexis/design/AGENTS.md` (tokens only, one accent,
   `<Icon name>` only, no emoji, every action in the command palette).
-- **Only `apps/desktop/src/features/workspace/trellis/` may import Trellis.**
+- **Only `apps/desktop/src/features/workspace/dockview/` may import dockview.**
   Panels use `usePanel()`; new panels follow docs/DEVELOPMENT.md "Adding a panel".
 - **Logic goes in the crates**, not in `src-tauri/src/commands` (thin adapters).
   Keep crates free of Tauri/React dependencies.

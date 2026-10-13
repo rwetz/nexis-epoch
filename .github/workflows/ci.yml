@@ -40,13 +40,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-      - uses: Swatinem/rust-cache@v2
-        with:
-          # libduckdb-sys downloads the prebuilt library here; if the build
-          # cache is restored without it, its build script doesn't rerun and
-          # linking fails with "unable to find library -lduckdb".
-          cache-directories: target/duckdb-download
-          key: duckdb-dl
+      # No build cache here, on purpose: a restored cache skips
+      # libduckdb-sys's build script, which is what downloads the prebuilt
+      # DuckDB library, so tests failed to link ("unable to find library
+      # -lduckdb"). Caching target/duckdb-download alongside did not hold.
+      # A cold build of these crates takes a few minutes.
       - run: cargo fmt --all --check
       - run: cargo clippy -p epoch-core -p epoch-config -p epoch-store -p epoch-runtime -p epoch-data --all-targets -- -D warnings
       - run: cargo test -p epoch-core -p epoch-config -p epoch-store -p epoch-runtime -p epoch-data

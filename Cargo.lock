@@ -1012,7 +1012,7 @@ checksum = "4ef6b89e5b37196644d8796de5268852ff179b44e96276cf4290264843743bb7"
 
 [[package]]
 name = "epoch-config"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "epoch-core",
  "serde",
@@ -1024,7 +1024,7 @@ dependencies = [
 
 [[package]]
 name = "epoch-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dunce",
  "serde",
@@ -1036,7 +1036,7 @@ dependencies = [
 
 [[package]]
 name = "epoch-data"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "duckdb",
  "epoch-core",
@@ -1048,7 +1048,7 @@ dependencies = [
 
 [[package]]
 name = "epoch-desktop"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "epoch-config",
  "epoch-core",
@@ -1067,7 +1067,7 @@ dependencies = [
 
 [[package]]
 name = "epoch-runtime"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "epoch-core",
  "serde",
@@ -1077,7 +1077,7 @@ dependencies = [
 
 [[package]]
 name = "epoch-store"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "epoch-core",
  "rusqlite",
