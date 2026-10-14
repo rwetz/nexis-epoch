@@ -1,5 +1,6 @@
 mod commands;
 mod error;
+mod links;
 mod state;
 
 use std::collections::HashMap;
@@ -40,10 +41,25 @@ pub fn run() {
         }
     }
 
+    // A launch carrying a `nexis-epoch://` link (from Nexis) goes to the Epoch
+    // that is already open and this process ends; otherwise Epoch opens and
+    // follows the link once the window is up. Plain launches are unaffected.
+    let launch_link = links::link_from_args(std::env::args().skip(1));
+    if let Some(url) = &launch_link {
+        if links::send("epoch", url).is_ok() {
+            return;
+        }
+    }
+
     tauri::Builder::default()
+        .manage(links::PendingLinks::default())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
-        .setup(|app| {
+        .setup(move |app| {
+            links::start_listener(app.handle().clone());
+            if let Some(url) = &launch_link {
+                links::queue_launch_link(app.handle(), url);
+            }
             let paths = AppPaths {
                 config_dir: app.path().app_config_dir()?,
                 data_dir: app.path().app_data_dir()?,
@@ -93,6 +109,8 @@ pub fn run() {
             commands::experiments::experiment_detail,
             commands::experiments::experiment_artifact,
             commands::system::system_status,
+            links::links_take_pending,
+            links::nexis_open,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Nexis Epoch");

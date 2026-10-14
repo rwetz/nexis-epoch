@@ -1,3 +1,4 @@
+import { useNexisLinks } from "@/features/links/links";
 import * as React from "react";
 import { CommandPalette, MOD_PROP, useCommandPaletteShortcut, WindowResizeEdges } from "@nexis/design";
 import { ConfirmHost } from "@/components/confirm";
@@ -40,6 +41,8 @@ export function AppShell() {
   const [palette, setPalette] = React.useState<PaletteMode | null>(null);
 
   React.useEffect(() => void bootstrap(), []);
+  // Links from Nexis: open a project, a run or a dataset (features/links).
+  useNexisLinks();
 
   useCommandPaletteShortcut(() => setPalette((p) => (p === "commands" ? null : "commands")));
   useModKey("p", () => setPalette((p) => (p === "search" ? null : "search")));

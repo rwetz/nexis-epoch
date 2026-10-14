@@ -8,6 +8,7 @@ import { formatMetric } from "@/lib/format";
 import { errorMessage } from "@/lib/ipc";
 import type { IndexedRun } from "@/types/backend";
 import { MAX_SELECTED, runLabel, useExperiments } from "./store";
+import { benchmarkInPulse, NEXIS_TOOLS, openInSynapse } from "@/features/links/links";
 
 export function statusTone(status: string): "success" | "danger" | "warning" | "neutral" {
   if (status === "ok") return "success";
@@ -47,6 +48,8 @@ function ExperimentExplorer() {
   const { runs, status, error, selected, select, reload, reindex } = useExperiments();
   const [query, setQuery] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  // The first selected run is the focused one (see store.ts).
+  const focused = runs.find((r) => r.runDir === selected[0]) ?? null;
 
   const shown = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -76,6 +79,18 @@ function ExperimentExplorer() {
           Runs
         </ToolbarTitle>
         <span className="flex-1" />
+        <ToolbarButton
+          icon="brain"
+          label={`Open the focused run in ${NEXIS_TOOLS.mlLab} (Nexis)`}
+          onClick={() => focused && void openInSynapse(focused.projectDir, focused.runId)}
+          disabled={!focused}
+        />
+        <ToolbarButton
+          icon="activity"
+          label={`Benchmark the focused run's project model in ${NEXIS_TOOLS.benchmark} (Nexis)`}
+          onClick={() => focused && void benchmarkInPulse(focused.projectDir)}
+          disabled={!focused}
+        />
         <ToolbarButton icon="refresh" label="Re-index from run files" onClick={() => void doReindex()} disabled={busy} />
       </PanelToolbar>
       <div className="shrink-0 border-b border-border/60 p-1.5">

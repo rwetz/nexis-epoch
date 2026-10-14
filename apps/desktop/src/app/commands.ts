@@ -13,6 +13,7 @@ import {
 } from "@/features/projects/actions";
 import { openFile } from "@/features/projects/ProjectExplorerPanel";
 import { useExperiments } from "@/features/experiments/store";
+import { benchmarkInPulse, NEXIS_TOOLS, openInSynapse } from "@/features/links/links";
 import { WORKSPACES } from "@/features/workspace/presets";
 import { api } from "@/lib/api";
 import { fileIcon } from "@/lib/fileIcons";
@@ -90,6 +91,31 @@ export function useCommands(): PaletteCommand[] {
           }
         },
       },
+      ...(project?.experimentStores ?? []).flatMap<PaletteCommand>((store) => {
+        const name = store.projectDir.split(/[\\/]/).pop() ?? store.projectDir;
+        return [
+          {
+            id: `nexis.synapse.${store.projectDir}`,
+            label: `Open ${name} in ${NEXIS_TOOLS.mlLab}`,
+            group: "Nexis",
+            icon: "brain",
+            keywords: ["nexis", "synapse", "ml lab", "train", store.projectDir],
+            run: () => {
+              const focused = useExperiments.getState().selected[0];
+              const run = useExperiments.getState().runs.find((r) => r.runDir === focused && r.projectDir === store.projectDir);
+              void openInSynapse(store.projectDir, run?.runId);
+            },
+          },
+          {
+            id: `nexis.pulse.${store.projectDir}`,
+            label: `Benchmark ${name}'s model in ${NEXIS_TOOLS.benchmark}`,
+            group: "Nexis",
+            icon: "activity",
+            keywords: ["nexis", "pulse", "benchmark", "onnx", "latency", store.projectDir],
+            run: () => void benchmarkInPulse(store.projectDir),
+          },
+        ];
+      }),
       { id: "view.sidebar", label: "Toggle sidebar", group: "View", icon: "sidebar-left", shortcut: fmtShortcut(MOD_KEY, "B"), run: toggleSidebar },
       {
         id: "view.mode",

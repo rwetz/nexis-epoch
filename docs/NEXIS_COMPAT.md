@@ -75,3 +75,31 @@ Verified against real data, as the brief asked:
   Epoch equivalent yet.
 - **The `weights` artifact** (per-epoch dense weights) is listed but not drawn;
   a network-graph view belongs with the Model Inspector's architecture work.
+
+## Links with Nexis
+
+Nexis names its ML tools **Synapse** (the ML Lab, tool id `ml-lab`) and
+**Pulse** (Benchmark, tool id `benchmark`). The three tools link both ways:
+
+| From | Action | Link |
+|---|---|---|
+| Synapse | Open in Epoch / Inspect run in Epoch | `nexis-epoch://open?project=<dir>[&run=<id>]` |
+| Pulse | Open in Epoch (models exported by Synapse) | `nexis-epoch://open?project=<dir>` |
+| Epoch, Runs toolbar and palette | Open in Synapse | `nexis://ml-lab?project=<dir>[&run=<id>]` |
+| Epoch, Runs toolbar and palette | Benchmark in Pulse | `nexis://benchmark?model=<dir>/model.onnx` |
+
+The links don't use an OS URL scheme. Each running app listens on a
+loopback port and writes `{port, token, pid}` to
+`<local data dir>/nexis/links/<app>.json` (`epoch` or `nexis`). A sender
+writes one JSON line, `{token, url}`. If the receiver isn't running, the
+sender launches it with `--link <url>`. A launch carrying a link hands it to
+the running copy and exits, so plain launches are unchanged.
+
+Code: `apps/desktop/src-tauri/src/links.rs` (validation, channel,
+`nexis_open`) and `apps/desktop/src/features/links/links.ts` (following a
+link: open the project, focus the run in Experiments, or open the dataset in
+Data). Nexis's half is `src-tauri/src/modules/links.rs` in the Nexis repo.
+Keep the two in step.
+
+Links only select. They need an absolute project path, and may add a run id
+or a dataset path inside the project. Anything else is rejected.

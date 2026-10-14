@@ -42,6 +42,12 @@ error, 18 imported runs, a 3-run metric overlay, a confusion matrix, and
 layout persistence. The folder picker itself was not clicked (the test calls
 the same backend command).
 
+**Works with Nexis.** Epoch has a launcher in the Nexis title bar, beside
+Synapse (the ML lab) and Pulse (the benchmark tool). Synapse and Pulse open
+projects, runs and models in Epoch. Epoch's Runs toolbar and command palette
+send a run back to Synapse or a model to Pulse. See
+[docs/NEXIS_COMPAT.md](docs/NEXIS_COMPAT.md#links-with-nexis).
+
 ## What doesn't exist yet
 
 Clearly labelled in the app where it shows at all:

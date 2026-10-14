@@ -48,6 +48,7 @@ its JavaScript doesn't.
 | Metadata | `rusqlite` (bundled SQLite) | 0.40 | MIT |
 | Config | `toml_edit` | 0.25 | MIT/Apache-2.0 |
 | System | `sysinfo` (system feature only) | 0.39 | MIT |
+| Links with Nexis | `dirs` (per-user data folder for the link channel) | 6 | MIT/Apache-2.0 |
 | Paths | `dunce` | 1.0 | CC0/MIT/Apache-2.0 |
 | Frontend | React 19, Vite 7, TypeScript 5.9 (strict), Tailwind 4 | via @nexis/design | MIT |
 | Editor | CodeMirror 6 (`@codemirror/*`, legacy TOML mode, `lang-sql`) | 6.x | MIT |
