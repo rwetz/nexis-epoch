@@ -19,18 +19,18 @@ import {
   Spinner,
   toast,
 } from "@nexis/design";
-import { DataGrid } from "@/components/DataGrid";
-import { CodeEditor } from "@/components/editor/CodeEditor";
-import { PanelToolbar, ToolbarTitle } from "@/components/PanelToolbar";
-import { EmptyState } from "@/components/states";
-import { useApp } from "@/app/store";
-import { usePanel } from "@/features/workspace/panel-context";
-import { definePanel, stringParams } from "@/features/workspace/registry";
-import { api } from "@/lib/api";
-import { basename, fileIcon } from "@/lib/fileIcons";
-import { formatCount, formatDuration } from "@/lib/format";
-import { BackendError, errorMessage, newQueryId } from "@/lib/ipc";
-import type { QueryResult } from "@/types/backend";
+import { DataGrid } from "@epoch/components/DataGrid";
+import { CodeEditor } from "@epoch/components/editor/CodeEditor";
+import { PanelToolbar, ToolbarTitle } from "@epoch/components/PanelToolbar";
+import { EmptyState } from "@epoch/components/states";
+import { useApp } from "@epoch/app/store";
+import { usePanel } from "@epoch/features/workspace/panel-context";
+import { definePanel, stringParams } from "@epoch/features/workspace/registry";
+import { api } from "@epoch/lib/api";
+import { basename, fileIcon } from "@epoch/lib/fileIcons";
+import { formatCount, formatDuration } from "@epoch/lib/format";
+import { BackendError, errorMessage, newQueryId } from "@epoch/lib/ipc";
+import type { QueryResult } from "@epoch/types/backend";
 
 const STARTER = `-- Ctrl/⌘+Enter runs the statement.
 -- Pick a dataset from "Datasets" to query it by name.

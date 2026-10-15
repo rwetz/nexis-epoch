@@ -1,0 +1,36 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Every Epoch command. Project files are reached only through these, and each confines its paths to the open project; nothing here grants general filesystem or shell access."
+permissions = [
+  "allow-app-info",
+  "allow-settings-get",
+  "allow-settings-save",
+  "allow-layout-load",
+  "allow-layout-save",
+  "allow-layout-delete",
+  "allow-project-open",
+  "allow-project-close",
+  "allow-project-current",
+  "allow-project-rescan",
+  "allow-project-recent",
+  "allow-project-forget",
+  "allow-project-files",
+  "allow-fs-list-dir",
+  "allow-fs-read-text",
+  "allow-fs-write-text",
+  "allow-toml-parse",
+  "allow-toml-set-value",
+  "allow-dataset-describe",
+  "allow-dataset-page",
+  "allow-dataset-stats",
+  "allow-sql-run",
+  "allow-sql-register-view",
+  "allow-query-cancel",
+  "allow-experiments-index",
+  "allow-experiments-list",
+  "allow-experiment-detail",
+  "allow-experiment-artifact",
+  "allow-model-inspect",
+  "allow-system-status",
+]

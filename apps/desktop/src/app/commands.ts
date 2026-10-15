@@ -4,21 +4,21 @@
  */
 import * as React from "react";
 import { fmtShortcut, listBuiltinThemes, MOD_KEY, type PaletteCommand, SHIFT_KEY, toast, useTheme } from "@nexis/design";
-import { PANELS } from "@/features/panels";
+import { PANELS } from "@epoch/features/panels";
 import {
   chooseAndOpenProject,
   closeProject,
   openProject,
   rescanProject,
-} from "@/features/projects/actions";
-import { openFile } from "@/features/projects/ProjectExplorerPanel";
-import { useExperiments } from "@/features/experiments/store";
-import { benchmarkInPulse, NEXIS_TOOLS, openInSynapse } from "@/features/links/links";
-import { WORKSPACES } from "@/features/workspace/presets";
-import { api } from "@/lib/api";
-import { fileIcon } from "@/lib/fileIcons";
-import { BACKEND_AVAILABLE, errorMessage } from "@/lib/ipc";
-import type { IndexedFile } from "@/types/backend";
+} from "@epoch/features/projects/actions";
+import { openFile } from "@epoch/features/projects/ProjectExplorerPanel";
+import { useExperiments } from "@epoch/features/experiments/store";
+import { benchmarkInPulse, NEXIS_TOOLS, openInSynapse } from "@epoch/features/links/links";
+import { WORKSPACES } from "@epoch/features/workspace/presets";
+import { api } from "@epoch/lib/api";
+import { fileIcon } from "@epoch/lib/fileIcons";
+import { BACKEND_AVAILABLE, errorMessage } from "@epoch/lib/ipc";
+import type { IndexedFile } from "@epoch/types/backend";
 import { openPanel, useApp, workspaceApi } from "./store";
 
 export function useCommands(): PaletteCommand[] {

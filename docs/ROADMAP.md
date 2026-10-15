@@ -33,9 +33,9 @@ The point at which Epoch stops being read-only.
   project provides. Form and source stay in sync through the
   format-preserving editor.
 - Edit run notes, tags and pins (writes `notes.json`, the Nexis format).
-- Model Inspector: Safetensors and ONNX header reading (tensor names, shapes,
-  dtypes, parameter counts) in Rust; architecture diagram from config or
-  from the `weights` artifact.
+- ~~Model Inspector: Safetensors and ONNX header reading~~ (done in 0.4.0:
+  `epoch-core::model_file`). Next: architecture diagram from config, from
+  the ONNX graph, or from the `weights` artifact.
 
 ## M4 — Data, deeper
 
@@ -54,12 +54,15 @@ The point at which Epoch stops being read-only.
 
 ## Ecosystem
 
-- `epoch://` URL scheme so Nexis can open a run or dataset in Epoch (the
-  family links apps by URL scheme, not a launcher).
+- Done in 0.4.0: Nexis's Epoch window runs this UI and backend (the
+  `embed.tsx` entry and `tauri-plugin-epoch`), pinned by commit. Every
+  feature here reaches Nexis on the next pin bump.
+- The Epoch window follows Nexis's theme (today it keeps Epoch's own,
+  shared with the standalone app).
 - GPUI: the `epoch-*` crates have no UI dependency, so a native Nexis can
   reuse them directly when it wants these views.
 
 ## Housekeeping
 
-- Choose a licence for Epoch itself (it has none yet).
+- ~~Choose a licence~~: MIT (0.4.0).
 - macOS and Linux hand-testing; code signing for releases.

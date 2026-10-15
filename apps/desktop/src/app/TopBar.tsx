@@ -10,14 +10,13 @@ import {
   Icon,
   Kbd,
   MOD_KEY,
-  SHIFT_KEY,
   TitleBar,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@nexis/design";
-import { AppLogo } from "@/AppLogo";
-import { WORKSPACES } from "@/features/workspace/presets";
+import { AppLogo } from "@epoch/AppLogo";
+import { WORKSPACES } from "@epoch/features/workspace/presets";
 import { useApp, workspaceApi } from "./store";
 
 function WorkspaceSelector() {
@@ -55,7 +54,7 @@ function WorkspaceSelector() {
   );
 }
 
-export function TopBar({ onPalette, onSearch }: { onPalette(): void; onSearch(): void }) {
+export function TopBar({ onSearch }: { onSearch(): void }) {
   const project = useApp((s) => s.project);
   const goTo = useApp((s) => s.goTo);
   return (
@@ -77,7 +76,7 @@ export function TopBar({ onPalette, onSearch }: { onPalette(): void; onSearch():
             className="flex h-7 min-w-0 flex-1 items-center gap-2 rounded-full bg-muted/70 px-3 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <Icon name="search" size="xs" />
-            <span className="flex-1 truncate text-left">{project ? `Search ${project.name}` : "Search commands"}</span>
+            <span className="flex-1 truncate text-left">{project ? `Search ${project.name} and commands` : "Search commands"}</span>
             <Kbd>{fmtShortcut(MOD_KEY, "P")}</Kbd>
           </button>
         </div>
@@ -86,19 +85,11 @@ export function TopBar({ onPalette, onSearch }: { onPalette(): void; onSearch():
         <>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-xs" aria-label="Command palette" onClick={onPalette}>
-                <Icon name="keyboard" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Commands {fmtShortcut(MOD_KEY, SHIFT_KEY, "P")}</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
               <Button variant="ghost" size="icon-xs" aria-label="Settings" onClick={() => goTo({ kind: "page", page: "settings" })}>
                 <Icon name="settings" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Settings</TooltipContent>
+            <TooltipContent>Settings {fmtShortcut(MOD_KEY, ",")}</TooltipContent>
           </Tooltip>
         </>
       }

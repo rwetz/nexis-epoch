@@ -1,7 +1,7 @@
 import * as React from "react";
 import { toast } from "@nexis/design";
-import { LoadingState } from "@/components/states";
-import { useApp } from "@/app/store";
+import { LoadingState } from "@epoch/components/states";
+import { useApp } from "@epoch/app/store";
 import { getWorkspace } from "./presets";
 import { loadLayout, saveLayout } from "./persistence";
 import { presetDocument, repairDocument } from "./dockview/document";

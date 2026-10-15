@@ -4,8 +4,8 @@
  * survives rearranging, because the layout never remounts them).
  */
 import { create } from "zustand";
-import type { AppSettings, ProjectSummary, RecentProject } from "@/types/backend";
-import type { OpenOptions, PanelParams, PanelTypeId, WorkspaceApi, WorkspaceId } from "@/features/workspace/types";
+import type { AppSettings, ProjectSummary, RecentProject } from "@epoch/types/backend";
+import type { OpenOptions, PanelParams, PanelTypeId, WorkspaceApi, WorkspaceId } from "@epoch/features/workspace/types";
 
 export type PageId = "overview" | "projects" | "pipelines" | "settings";
 export type Location = { kind: "page"; page: PageId } | { kind: "workspace"; workspace: WorkspaceId };

@@ -26,7 +26,7 @@ export const WORKSPACES: readonly WorkspacePreset[] = [
         ),
         column([panel(view("training-metrics")), panel(view("model-inspector"))], [1, 1]),
       ],
-      [1, 3, 1.7],
+      [1.15, 3, 1.6],
     ),
   },
   {
@@ -40,7 +40,7 @@ export const WORKSPACES: readonly WorkspacePreset[] = [
   {
     id: "experiments",
     name: "Experiments",
-    icon: "chart-line",
+    icon: "layers",
     description: "Runs side by side: metrics, comparisons and logs.",
     version: 1,
     layout: row(
@@ -59,7 +59,7 @@ export const WORKSPACES: readonly WorkspacePreset[] = [
   {
     id: "config",
     name: "Config",
-    icon: "settings",
+    icon: "file-code",
     description: "Edit TOML configuration with validation and a structured view.",
     version: 1,
     layout: row([panel(view("project-explorer")), stage(panel(view("toml-editor")))], [1, 3.5]),

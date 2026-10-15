@@ -23,13 +23,33 @@ the map; the code comments carry the detail.
   run store
 ```
 
+## Two hosts, one source
+
+Epoch runs as its own app and as a window inside Nexis, from the same code:
+
+- **Backend:** every command is in `crates/tauri-plugin-epoch`, a Tauri
+  plugin. The standalone app (`apps/desktop/src-tauri`) registers it and adds
+  only its window, the OS plugins and the loopback link channel to Nexis
+  (`links.rs`). Nexis registers the same plugin, pinned by commit. Both keep
+  Epoch's state in the standalone app's folders (`app.nexis.epoch`), so
+  recent projects, the run index, layouts and settings are shared.
+- **Frontend:** `src/embed.tsx` mounts the whole UI given an `EpochHost`
+  (`src/host.ts`). `main.tsx` mounts it with the standalone host; Nexis
+  builds `embed.tsx` into a page of its own (`epoch.html`) with a host whose
+  links come from the window's launch parameters and which opens Synapse and
+  Pulse in place. Hosts type-check against `embed.d.ts`, which a test keeps
+  in step with the implementation. Imports inside Epoch use `@epoch/…`,
+  because `@` belongs to Nexis's sources in that build.
+- Commands are called as `plugin:epoch|<name>` (`lib/ipc.ts`); each host
+  grants `epoch:default` to its Epoch window.
+
 ## Principles
 
 - **The core knows nothing about the UI.** `epoch-core`, `epoch-config`,
   `epoch-store`, `epoch-data` and `epoch-runtime` have no Tauri, React or
   layout-library dependency and are tested on their own. A native (GPUI)
   Nexis could link them directly.
-- **Commands are adapters.** `src-tauri/src/commands/*` validates input, moves
+- **Commands are adapters.** `crates/tauri-plugin-epoch/src/commands/*` validates input, moves
   blocking work off the async runtime (`spawn_blocking`) and calls a crate.
   Logic worth testing lives in the crates.
 - **Files stay the source of truth.** Epoch reads projects in place. SQLite

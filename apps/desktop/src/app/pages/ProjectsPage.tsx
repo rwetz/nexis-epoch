@@ -1,9 +1,9 @@
 import { Button, Icon, PropertyList, SectionLabel, toast } from "@nexis/design";
-import { EmptyState } from "@/components/states";
-import { chooseAndOpenProject, closeProject, openProject, refreshRecent, rescanProject } from "@/features/projects/actions";
-import { api } from "@/lib/api";
-import { formatRelativeTime } from "@/lib/format";
-import { errorMessage } from "@/lib/ipc";
+import { EmptyState } from "@epoch/components/states";
+import { chooseAndOpenProject, closeProject, openProject, refreshRecent, rescanProject } from "@epoch/features/projects/actions";
+import { api } from "@epoch/lib/api";
+import { formatRelativeTime } from "@epoch/lib/format";
+import { errorMessage } from "@epoch/lib/ipc";
 import { useApp } from "../store";
 
 export function ProjectsPage() {

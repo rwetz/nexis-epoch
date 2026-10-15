@@ -16,7 +16,7 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "types": ["vite/client"],
-    "paths": { "@/*": ["./src/*"] }
+    "paths": { "@epoch/*": ["./src/*"] }
   },
   "include": ["src", "vite.config.ts"]
 }

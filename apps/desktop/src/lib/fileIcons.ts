@@ -1,5 +1,5 @@
 import type { IconName } from "@nexis/design";
-import type { FileKind } from "@/types/backend";
+import type { FileKind } from "@epoch/types/backend";
 
 const ICONS: Record<FileKind, IconName> = {
   directory: "folder",

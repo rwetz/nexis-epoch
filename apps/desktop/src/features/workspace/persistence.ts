@@ -13,8 +13,8 @@
  * newer Epoch is not guessed at: the preset is used and the file is left
  * alone until the user changes the layout.
  */
-import { api } from "@/lib/api";
-import { BACKEND_AVAILABLE } from "@/lib/ipc";
+import { api } from "@epoch/lib/api";
+import { BACKEND_AVAILABLE } from "@epoch/lib/ipc";
 import type { WorkspaceId } from "./types";
 
 export const LAYOUT_SCHEMA = 1;

@@ -13,6 +13,13 @@ import type { LayoutNode, LayoutView, WorkspacePreset } from "../types";
  * own type for this isn't exported; these are the fields Epoch uses. */
 export type GroupPanelViewState = { id: string; views: string[]; activeView?: string };
 
+/**
+ * The smallest a panel may be dragged or squeezed to. Below this a tab
+ * strip clips and an empty state stacks one word per line, which is what a
+ * side column looked like on a small window.
+ */
+export const PANEL_MIN = { minimumWidth: 220, minimumHeight: 120 } as const;
+
 /** dockview scales sizes to the real container; this is just the unit. */
 const CANVAS = 1000;
 
@@ -69,7 +76,7 @@ export function presetDocument(preset: WorkspacePreset): SerializedDockview {
       const id = panelId(v);
       const def = getPanel(v.type);
       const params = (def ? def.parseParams(v.params ?? {}) : (v.params ?? {})) as Record<string, unknown>;
-      panels[id] = { id, contentComponent: v.type, title: def?.title ?? v.type, params };
+      panels[id] = { id, contentComponent: v.type, title: def?.title ?? v.type, params, ...PANEL_MIN };
       return id;
     });
     const id = `group-${++groups}`;
@@ -132,6 +139,9 @@ export function repairDocument(raw: unknown): SerializedDockview | null {
       continue;
     }
     state.params = def.parseParams(state.params ?? {}) as Record<string, unknown>;
+    // Layouts saved before minimum sizes existed get them too.
+    state.minimumWidth ??= PANEL_MIN.minimumWidth;
+    state.minimumHeight ??= PANEL_MIN.minimumHeight;
   }
   const known = (id: string) => id in doc.panels;
   const groupIds = new Set<string>();

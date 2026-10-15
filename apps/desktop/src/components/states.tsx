@@ -16,7 +16,7 @@ import {
   type IconName,
   Spinner,
 } from "@nexis/design";
-import { BackendError } from "@/lib/ipc";
+import { BackendError } from "@epoch/lib/ipc";
 
 export function LoadingState({ label = "Loading…", className }: { label?: string; className?: string }) {
   return (
@@ -41,7 +41,7 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <Empty className={cn("h-full min-h-40 gap-3 border-0 p-6", className)}>
+    <Empty className={cn("epoch-empty h-full min-h-40 gap-3 border-0 p-6", className)}>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Icon name={icon} />

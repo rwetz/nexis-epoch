@@ -1,4 +1,4 @@
-import { EmptyState } from "@/components/states";
+import { EmptyState } from "@epoch/components/states";
 
 /** Clearly a placeholder, and kept to one screen on purpose. */
 export function PipelinesPage() {

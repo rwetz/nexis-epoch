@@ -1,5 +1,5 @@
 import * as React from "react";
-import { formatMetric } from "@/lib/format";
+import { formatMetric } from "@epoch/lib/format";
 import { baseOption, EChart, type EChartsOption, useChartTheme } from "./EChart";
 
 export type XYSeries = {
@@ -19,16 +19,19 @@ export function SeriesChart({
   title,
   series,
   xLabel = "step",
+  legend = true,
   className,
 }: {
   title: string;
   series: readonly XYSeries[];
   xLabel?: string;
+  /** Off when the surrounding panel already shows one legend for every chart. */
+  legend?: boolean;
   className?: string;
 }) {
   const t = useChartTheme();
   const option = React.useMemo<EChartsOption>(() => {
-    const many = series.length > 1;
+    const many = legend && series.length > 1;
     return {
       ...baseOption(t),
       grid: { left: 8, right: 16, top: many ? 30 : 12, bottom: 22, containLabel: true },
@@ -89,7 +92,7 @@ export function SeriesChart({
         };
       }),
     } satisfies EChartsOption;
-  }, [series, t, xLabel]);
+  }, [series, t, xLabel, legend]);
 
   return <EChart option={option} label={`${title} chart`} className={className} />;
 }

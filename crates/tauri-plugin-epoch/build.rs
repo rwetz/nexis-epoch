@@ -1,0 +1,38 @@
+//! Generates the plugin's `allow-<command>` permissions from this list.
+//! Keep it in step with `generate_handler!` in src/lib.rs.
+const COMMANDS: &[&str] = &[
+    "app_info",
+    "settings_get",
+    "settings_save",
+    "layout_load",
+    "layout_save",
+    "layout_delete",
+    "project_open",
+    "project_close",
+    "project_current",
+    "project_rescan",
+    "project_recent",
+    "project_forget",
+    "project_files",
+    "fs_list_dir",
+    "fs_read_text",
+    "fs_write_text",
+    "toml_parse",
+    "toml_set_value",
+    "dataset_describe",
+    "dataset_page",
+    "dataset_stats",
+    "sql_run",
+    "sql_register_view",
+    "query_cancel",
+    "experiments_index",
+    "experiments_list",
+    "experiment_detail",
+    "experiment_artifact",
+    "model_inspect",
+    "system_status",
+];
+
+fn main() {
+    tauri_plugin::Builder::new(COMMANDS).build();
+}

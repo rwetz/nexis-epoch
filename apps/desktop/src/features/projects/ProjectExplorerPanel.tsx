@@ -1,14 +1,14 @@
 import * as React from "react";
 import { Button, Icon, toast, Tree, type TreeNode } from "@nexis/design";
-import { PanelToolbar, ToolbarButton, ToolbarTitle } from "@/components/PanelToolbar";
-import { EmptyState, ErrorState, LoadingState } from "@/components/states";
-import { openPanel, useApp } from "@/app/store";
-import { definePanel, noParams } from "@/features/workspace/registry";
-import { api } from "@/lib/api";
-import { fileIcon, isTabular } from "@/lib/fileIcons";
-import { formatBytes } from "@/lib/format";
-import { errorMessage } from "@/lib/ipc";
-import type { DirEntry } from "@/types/backend";
+import { PanelToolbar, ToolbarButton, ToolbarTitle } from "@epoch/components/PanelToolbar";
+import { EmptyState, ErrorState, LoadingState } from "@epoch/components/states";
+import { openPanel, useApp } from "@epoch/app/store";
+import { definePanel, noParams } from "@epoch/features/workspace/registry";
+import { api } from "@epoch/lib/api";
+import { fileIcon, isTabular } from "@epoch/lib/fileIcons";
+import { formatBytes } from "@epoch/lib/format";
+import { errorMessage } from "@epoch/lib/ipc";
+import type { DirEntry } from "@epoch/types/backend";
 import { chooseAndOpenProject, openProject } from "./actions";
 
 type DirState = { status: "loading" } | { status: "ready"; entries: DirEntry[]; truncated: boolean } | { status: "error"; error: string };
@@ -19,7 +19,12 @@ const LOADING_SUFFIX = "\u0000loading";
 export function openFile(entry: Pick<DirEntry, "path" | "kind">): void {
   if (entry.kind === "toml") openPanel("toml-editor", { path: entry.path }, { reuse: "params" });
   else if (isTabular(entry.kind)) openPanel("dataset-explorer", { path: entry.path }, { reuse: "params" });
-  else toast("No viewer for this file yet", { description: `${entry.path} — Epoch opens TOML, CSV, Parquet and JSON files.` });
+  else if (/\.(safetensors|onnx)$/i.test(entry.path)) openPanel("model-inspector", { path: entry.path }, { reuse: "params" });
+  else if (entry.kind === "checkpoint")
+    toast("Not read by Epoch", {
+      description: `${entry.path}: PyTorch and pickle checkpoints can run code when loaded, so Epoch doesn't open them. Safetensors and ONNX files open in the Model panel.`,
+    });
+  else toast("No viewer for this file yet", { description: `${entry.path}: Epoch opens TOML, CSV, Parquet, JSON, Safetensors and ONNX files.` });
 }
 
 function ProjectExplorer() {

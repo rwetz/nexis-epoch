@@ -29,7 +29,7 @@ export interface PanelParamsMap {
   /** With `runDir`, pinned to that run; without, follows the selection. */
   "training-metrics": { runDir?: string };
   "execution-logs": { runDir?: string };
-  "model-inspector": { runDir?: string };
+  "model-inspector": { runDir?: string; path?: string };
 }
 
 export type PanelParams<T extends PanelTypeId> = PanelParamsMap[T];

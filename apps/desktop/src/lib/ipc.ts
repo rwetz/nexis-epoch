@@ -39,7 +39,11 @@ function toBackendError(e: unknown): BackendError {
   return new BackendError("internal", e instanceof Error ? e.message : String(e));
 }
 
-/** Invoke a Tauri command; failures always reject with a `BackendError`. */
+/**
+ * Invoke an Epoch command; failures always reject with a `BackendError`.
+ * The commands live in `tauri-plugin-epoch`, which the standalone app and
+ * Nexis's Epoch window both register, hence the plugin prefix.
+ */
 export async function call<T>(command: string, args?: Record<string, unknown>): Promise<T> {
   if (!BACKEND_AVAILABLE) {
     throw new BackendError(
@@ -48,7 +52,7 @@ export async function call<T>(command: string, args?: Record<string, unknown>): 
     );
   }
   try {
-    return await invoke<T>(command, args);
+    return await invoke<T>(`plugin:epoch|${command}`, args);
   } catch (e) {
     throw toBackendError(e);
   }

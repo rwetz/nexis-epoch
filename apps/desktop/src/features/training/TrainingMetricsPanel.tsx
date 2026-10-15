@@ -1,14 +1,14 @@
 import * as React from "react";
 import { Badge, cn, Icon } from "@nexis/design";
-import { SeriesChart, type XYSeries } from "@/components/charts/SeriesChart";
-import { PanelToolbar, ToolbarTitle } from "@/components/PanelToolbar";
-import { EmptyState, ErrorState, LoadingState } from "@/components/states";
-import { SeriesSwatch } from "@/features/experiments/ExperimentExplorerPanel";
-import { runLabel, useExperiments } from "@/features/experiments/store";
-import { useRunViews } from "@/features/experiments/useRunDetails";
-import { usePanel } from "@/features/workspace/panel-context";
-import { definePanel, stringParams } from "@/features/workspace/registry";
-import { basename } from "@/lib/fileIcons";
+import { SeriesChart, type XYSeries } from "@epoch/components/charts/SeriesChart";
+import { PanelToolbar, ToolbarTitle } from "@epoch/components/PanelToolbar";
+import { EmptyState, ErrorState, LoadingState } from "@epoch/components/states";
+import { SeriesSwatch } from "@epoch/features/experiments/ExperimentExplorerPanel";
+import { runLabel, useExperiments } from "@epoch/features/experiments/store";
+import { useRunViews } from "@epoch/features/experiments/useRunDetails";
+import { usePanel } from "@epoch/features/workspace/panel-context";
+import { definePanel, stringParams } from "@epoch/features/workspace/registry";
+import { basename } from "@epoch/lib/fileIcons";
 import { RunFollowToggle } from "./RunFollow";
 
 /** loss first, then accuracy, then everything else alphabetically. */
@@ -101,7 +101,11 @@ function TrainingMetrics() {
       {metrics.length === 0 ? (
         <EmptyState icon="chart-line" title="No metrics recorded" description="These runs' metrics.jsonl has no metric events." />
       ) : (
-        <div className="nexis-scrollbar grid min-h-0 flex-1 auto-rows-[minmax(190px,1fr)] grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 overflow-y-auto p-2">
+        // Small multiples: as many columns as fit, every chart the same
+        // landscape shape. Rows used to stretch to the panel's height, which
+        // on a large screen made each chart a tall strip; auto-fill also
+        // left empty tracks to the right once the panel was wide.
+        <div className="epoch-content-enter nexis-scrollbar grid min-h-0 flex-1 grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] content-start gap-2 overflow-y-auto p-2">
           {metrics
             .filter((m) => !hidden.has(m))
             .map((metric) => {
@@ -111,7 +115,11 @@ function TrainingMetrics() {
               });
               const decimated = ready.some((r) => r.detail.series.find((x) => x.name === metric)?.decimated);
               return (
-                <section key={metric} className="flex min-h-0 flex-col rounded-lg border border-border/60 bg-card p-2" aria-label={metric}>
+                <section
+                  key={metric}
+                  className="flex aspect-[16/10] max-h-[480px] min-h-[200px] flex-col rounded-lg border border-border/60 bg-card p-2"
+                  aria-label={metric}
+                >
                   <header className="flex items-center gap-1.5 px-1 pb-1">
                     <span className="font-mono text-[11.5px] font-medium">{metric}</span>
                     {decimated && (
@@ -120,7 +128,7 @@ function TrainingMetrics() {
                       </Badge>
                     )}
                   </header>
-                  <SeriesChart title={metric} series={series} className="min-h-0 flex-1" />
+                  <SeriesChart title={metric} series={series} legend={false} className="min-h-0 flex-1" />
                 </section>
               );
             })}

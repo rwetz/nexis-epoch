@@ -23,13 +23,13 @@ import {
 } from "dockview-react";
 import "dockview-react/dist/styles/dockview.css";
 import { cn, Icon, useTheme } from "@nexis/design";
-import { PanelErrorBoundary } from "@/components/PanelErrorBoundary";
-import { confirmAction } from "@/components/confirm";
-import { useApp } from "@/app/store";
+import { PanelErrorBoundary } from "@epoch/components/PanelErrorBoundary";
+import { confirmAction } from "@epoch/components/confirm";
+import { useApp } from "@epoch/app/store";
 import { getPanel, listPanels } from "../registry";
 import { PanelContext } from "../panel-context";
 import type { PanelDefinition, PanelHandle, WorkspaceApi, WorkspacePreset } from "../types";
-import { presetDocument } from "./document";
+import { PANEL_MIN, presetDocument } from "./document";
 
 /**
  * Panel ids from presets are only unique within a workspace (Studio and
@@ -124,7 +124,7 @@ function EpochTab({ api }: IDockviewPanelHeaderProps) {
   const dirty = useApp((s) => !!s.dirty[panelKey(workspace, api.id)]);
   return (
     <div className="epoch-tab" title={title} onAuxClick={(e) => e.button === 1 && void requestClose(workspace, api)}>
-      {def && <Icon name={def.icon} size="xs" className="shrink-0 opacity-80" />}
+      {def && <Icon name={def.icon} size="xs" className="epoch-tab-icon" />}
       <span className="truncate">{title}</span>
       <button
         type="button"
@@ -198,7 +198,7 @@ export function DockviewWorkspace({ preset, initialDocument, onDocumentChange, o
         }
         const id = `${type}-${Date.now().toString(36)}-${++nextPanel}`;
         const placement = options?.placement ?? def.placement;
-        const base = { id, component: type, title: def.tabTitle?.(parsed as never) ?? def.title, params: parsed };
+        const base = { id, component: type, title: def.tabTitle?.(parsed as never) ?? def.title, params: parsed, ...PANEL_MIN };
         if (placement === "float") {
           api.addPanel({ ...base, floating: true });
           return;

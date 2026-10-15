@@ -6,8 +6,8 @@
  * first (the "focused" run) unless pinned to one by their params.
  */
 import { create } from "zustand";
-import { api } from "@/lib/api";
-import type { IndexedRun, RunDetail } from "@/types/backend";
+import { api } from "@epoch/lib/api";
+import type { IndexedRun, RunDetail } from "@epoch/types/backend";
 
 /** Most runs overlaid at once: one per categorical colour slot. */
 export const MAX_SELECTED = 5;

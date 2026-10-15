@@ -1021,7 +1021,7 @@ checksum = "4ef6b89e5b37196644d8796de5268852ff179b44e96276cf4290264843743bb7"
 
 [[package]]
 name = "epoch-config"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "epoch-core",
  "serde",
@@ -1033,7 +1033,7 @@ dependencies = [
 
 [[package]]
 name = "epoch-core"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "dunce",
  "serde",
@@ -1045,7 +1045,7 @@ dependencies = [
 
 [[package]]
 name = "epoch-data"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "duckdb",
  "epoch-core",
@@ -1057,27 +1057,22 @@ dependencies = [
 
 [[package]]
 name = "epoch-desktop"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "dirs 6.0.0",
- "epoch-config",
- "epoch-core",
- "epoch-data",
- "epoch-runtime",
- "epoch-store",
  "serde",
  "serde_json",
- "sysinfo",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
+ "tauri-plugin-epoch",
  "tauri-plugin-os",
  "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "epoch-runtime"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "epoch-core",
  "serde",
@@ -1087,7 +1082,7 @@ dependencies = [
 
 [[package]]
 name = "epoch-store"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "epoch-core",
  "rusqlite",
@@ -4058,6 +4053,23 @@ dependencies = [
  "tauri-plugin-fs",
  "thiserror 2.0.21",
  "url",
+]
+
+[[package]]
+name = "tauri-plugin-epoch"
+version = "0.4.0"
+dependencies = [
+ "epoch-config",
+ "epoch-core",
+ "epoch-data",
+ "epoch-runtime",
+ "epoch-store",
+ "serde",
+ "serde_json",
+ "sysinfo",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.21",
 ]
 
 [[package]]

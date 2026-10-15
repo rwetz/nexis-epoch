@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { CellValue } from "@/types/backend";
+import type { CellValue } from "@epoch/types/backend";
 
 export type FetchPage = (offset: number, limit: number) => Promise<CellValue[][]>;
 

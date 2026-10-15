@@ -8,6 +8,6 @@
     "build": "pnpm --filter @nexis-epoch/desktop build",
     "typecheck": "pnpm --filter @nexis-epoch/desktop typecheck",
     "test": "pnpm --filter @nexis-epoch/desktop test",
-    "check": "pnpm typecheck && pnpm test && cargo fmt --all --check && cargo clippy --workspace --exclude epoch-desktop --all-targets -- -D warnings && cargo test --workspace --exclude epoch-desktop"
+    "check": "pnpm typecheck && pnpm test && cargo fmt --all --check && cargo clippy --workspace --exclude epoch-desktop --exclude tauri-plugin-epoch --all-targets -- -D warnings && cargo test --workspace --exclude epoch-desktop --exclude tauri-plugin-epoch"
   }
 }

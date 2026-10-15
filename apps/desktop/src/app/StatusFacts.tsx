@@ -1,8 +1,8 @@
 import * as React from "react";
 import { StatusBar, StatusDot, StatusItem } from "@nexis/design";
-import { api } from "@/lib/api";
-import { BACKEND_AVAILABLE } from "@/lib/ipc";
-import type { SystemStatus } from "@/types/backend";
+import { api } from "@epoch/lib/api";
+import { BACKEND_AVAILABLE } from "@epoch/lib/ipc";
+import type { SystemStatus } from "@epoch/types/backend";
 import { useApp } from "./store";
 
 const POLL_MS = 3_000;

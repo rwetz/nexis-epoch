@@ -1,9 +1,9 @@
-import { useNexisLinks } from "@/features/links/links";
+import { useNexisLinks } from "@epoch/features/links/links";
 import * as React from "react";
 import { CommandPalette, MOD_PROP, useCommandPaletteShortcut, WindowResizeEdges } from "@nexis/design";
-import { ConfirmHost } from "@/components/confirm";
-import { chooseAndOpenProject, bootstrap } from "@/features/projects/actions";
-import { WorkspaceHost } from "@/features/workspace/WorkspaceHost";
+import { ConfirmHost } from "@epoch/components/confirm";
+import { chooseAndOpenProject, bootstrap } from "@epoch/features/projects/actions";
+import { WorkspaceHost } from "@epoch/features/workspace/WorkspaceHost";
 import { useCommands, useFileCommands } from "./commands";
 import { OverviewPage } from "./pages/OverviewPage";
 import { PipelinesPage } from "./pages/PipelinesPage";
@@ -57,10 +57,14 @@ export function AppShell() {
   const activeWorkspace = location.kind === "workspace" ? location.workspace : null;
 
   return (
-    <div className="flex h-full flex-col bg-background text-foreground">
+    // The window arrives like a Nexis tool window: it settles in, the title
+    // bar drops, the body rises behind it (styles.css, "Entrances").
+    <div className="nexis-window-enter flex h-full flex-col bg-background text-foreground">
       <WindowResizeEdges />
-      <TopBar onPalette={() => setPalette("commands")} onSearch={() => setPalette("search")} />
-      <div className="flex min-h-0 flex-1">
+      <div className="epoch-shell-header">
+        <TopBar onSearch={() => setPalette("search")} />
+      </div>
+      <div className="epoch-shell-body flex min-h-0 flex-1">
         <Sidebar />
         <main className="relative min-w-0 flex-1">
           {/* Workspaces stay mounted once opened, so panels keep their state
@@ -69,7 +73,7 @@ export function AppShell() {
             <WorkspaceHost key={id} id={id} active={id === activeWorkspace} />
           ))}
           {location.kind === "page" && (
-            <div className="absolute inset-0 bg-background">
+            <div key={location.page} className="epoch-view-enter absolute inset-0 bg-background">
               {location.page === "overview" && <OverviewPage />}
               {location.page === "projects" && <ProjectsPage />}
               {location.page === "pipelines" && <PipelinesPage />}
@@ -78,7 +82,9 @@ export function AppShell() {
           )}
         </main>
       </div>
-      <StatusFacts />
+      <div className="epoch-shell-status">
+        <StatusFacts />
+      </div>
       <CommandPalette
         open={palette !== null}
         onOpenChange={(open) => !open && setPalette(null)}

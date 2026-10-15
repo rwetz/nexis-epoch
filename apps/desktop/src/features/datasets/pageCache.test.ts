@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CellValue } from "@/types/backend";
+import type { CellValue } from "@epoch/types/backend";
 import { PageCache } from "./pageCache";
 
 const flush = () => new Promise((r) => setTimeout(r, 0));

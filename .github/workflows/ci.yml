@@ -75,7 +75,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # generate_context! needs the built frontend.
       - run: pnpm build
-      - run: cargo clippy -p epoch-desktop --all-targets -- -D warnings
+      - run: cargo clippy -p tauri-plugin-epoch -p epoch-desktop --all-targets -- -D warnings
 
   desktop:
     # The full app: Tauri plus DuckDB compiled in. Slow, so only on main,

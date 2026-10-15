@@ -16,7 +16,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn, Icon } from "@nexis/design";
-import type { CellValue, Column, Sort } from "@/types/backend";
+import type { CellValue, Column, Sort } from "@epoch/types/backend";
 
 const ROW_HEIGHT = 26;
 const NUMERIC = /^(TINYINT|SMALLINT|INTEGER|BIGINT|HUGEINT|U?(TINY|SMALL|BIG)?INT(EGER)?|UHUGEINT|FLOAT|DOUBLE|REAL|DECIMAL)/i;

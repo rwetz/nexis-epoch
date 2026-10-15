@@ -1,14 +1,14 @@
 import * as React from "react";
 import { Badge, Checkbox, cn, Icon, Input, MOD_KEY, StatusDot, toast, Tooltip, TooltipContent, TooltipTrigger } from "@nexis/design";
-import { PanelToolbar, ToolbarButton, ToolbarTitle } from "@/components/PanelToolbar";
-import { EmptyState, ErrorState, LoadingState } from "@/components/states";
-import { useApp } from "@/app/store";
-import { definePanel, noParams } from "@/features/workspace/registry";
-import { formatMetric } from "@/lib/format";
-import { errorMessage } from "@/lib/ipc";
-import type { IndexedRun } from "@/types/backend";
+import { PanelToolbar, ToolbarButton, ToolbarTitle } from "@epoch/components/PanelToolbar";
+import { EmptyState, ErrorState, LoadingState } from "@epoch/components/states";
+import { useApp } from "@epoch/app/store";
+import { definePanel, noParams } from "@epoch/features/workspace/registry";
+import { formatMetric } from "@epoch/lib/format";
+import { errorMessage } from "@epoch/lib/ipc";
+import type { IndexedRun } from "@epoch/types/backend";
 import { MAX_SELECTED, runLabel, useExperiments } from "./store";
-import { benchmarkInPulse, NEXIS_TOOLS, openInSynapse } from "@/features/links/links";
+import { benchmarkInPulse, NEXIS_TOOLS, openInSynapse } from "@epoch/features/links/links";
 
 export function statusTone(status: string): "success" | "danger" | "warning" | "neutral" {
   if (status === "ok") return "success";
@@ -204,7 +204,7 @@ function ExperimentExplorer() {
 export const experimentExplorerPanel = definePanel({
   type: "experiment-explorer",
   title: "Experiments",
-  icon: "chart-line",
+  icon: "layers",
   description: "Runs imported from Nexis ML run stores, indexed in SQLite. Select runs to compare.",
   component: ExperimentExplorer,
   parseParams: noParams,

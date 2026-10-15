@@ -29,6 +29,8 @@ Lab experiments directly, but it is a standalone app.
 | **Experiments** | Imports Nexis ML runs (`.nexis-ml/runs`, both engines) read-only into a rebuildable SQLite index; list, filter, focus and compare up to 5 runs. | Rust tests + a test run against two real projects (19 runs) |
 | **Training metrics** | Every recorded metric as its own chart (small multiples), overlaid across selected runs, spike-preserving decimation; pin a panel to one run. | Typecheck + browser render; charts not yet seen with real data in the app |
 | **Logs / Model inspector** | A run's log (level filter, search), generated-text samples, configuration snapshot, checkpoints, per-epoch confusion matrices with an epoch slider. | Same as above |
+| **Weight files** | `.safetensors` and `.onnx` files open in the Model panel from the project explorer: parameter count, dtypes, every tensor's shape, and for ONNX the graph's inputs/outputs, opsets, producer and operator counts. Headers only; ONNX weights are seeked past, never loaded. PyTorch pickles are refused (loading them can run code). | Rust tests on built fixtures, truncation and bad input; a real nexis-ml-rs export |
+| **Inside Nexis** | The same UI and backend as Nexis's Epoch window: Nexis builds `src/embed.tsx` and registers `tauri-plugin-epoch`, both pinned to one commit of this repo. | Nexis typecheck, tests and production build |
 | **Workspace** | Five workspaces (Studio, Data, Experiments, Models, Config) built from a central panel registry (dockview, MIT); split, tab, drag to dock, float, maximize; multiple instances of a panel; layouts saved per workspace in a versioned format with migrations; reset to default. | Unit tests (migrations, registry, presets); save → reload → restore checked in a browser |
 | **Shell** | Title bar with project, workspace switcher, search (Ctrl/⌘+P: files + commands), command palette (Ctrl/⌘+Shift+P, ~60 commands), collapsible sidebar, status bar (project, Python env, backend, running queries, CPU/memory, NVIDIA GPU when `nvidia-smi` exists), 22 themes × light/dark × high contrast. | Browser render in two themes and both modes |
 | **Settings** | Data limits (page size, row limit, timeout, memory, threads), Python interpreter, hidden files, index-on-open; saved to `settings.toml` keeping your comments; appearance; workspace navigation; forget saved layouts. | Rust tests (round trip, per-field fallback, comment preservation) |
@@ -56,7 +58,7 @@ Clearly labelled in the app where it shows at all:
   their events, but nothing launches a process. Metrics and logs are read from
   finished runs' files, not streamed live.
 - **Schema-driven config forms**, editing run notes/tags, architecture
-  diagrams, Safetensors/ONNX inspection.
+  diagrams.
 - **More data sources**: SQLite databases, remote databases, image and text
   datasets, Polars transforms, the Pipelines page.
 - **Generated TS types** from Rust (the mirror is hand-kept).
@@ -93,8 +95,11 @@ Tauri 2 · React 19 · TypeScript (strict) · Vite · Tailwind 4 ·
 ECharts · Rust (DuckDB, SQLite, toml_edit).
 
 ```
-apps/desktop/        Tauri app: React frontend + thin Rust commands
-crates/epoch-core    paths, files, project detection, Nexis ML format
+apps/desktop/             the standalone app: React frontend (also built
+                          into Nexis's Epoch window) + window and links
+crates/tauri-plugin-epoch every Epoch command, as a plugin both hosts register
+crates/epoch-core         paths, files, project detection, Nexis ML format,
+                          Safetensors/ONNX headers
 crates/epoch-config  TOML parsing/editing, settings.toml
 crates/epoch-store   SQLite: recent projects, experiment index
 crates/epoch-data    DuckDB: datasets and sandboxed SQL
@@ -112,4 +117,4 @@ the dependency checks and trade-offs.
 Every dependency Epoch ships is under an open-source licence (MIT, Apache-2.0
 and similar; see [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md)). The workspace
 layout uses dockview's MIT core; 0.1.0's non-commercial Trellis dependency was
-replaced in 0.2.0. Epoch itself has no licence file yet.
+replaced in 0.2.0. Epoch itself is MIT-licensed ([LICENSE](LICENSE)).

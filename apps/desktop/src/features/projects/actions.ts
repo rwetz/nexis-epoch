@@ -4,10 +4,10 @@
  */
 import { open } from "@tauri-apps/plugin-dialog";
 import { toast } from "@nexis/design";
-import { useApp } from "@/app/store";
-import { useExperiments } from "@/features/experiments/store";
-import { api } from "@/lib/api";
-import { BACKEND_AVAILABLE, errorMessage } from "@/lib/ipc";
+import { useApp } from "@epoch/app/store";
+import { useExperiments } from "@epoch/features/experiments/store";
+import { api } from "@epoch/lib/api";
+import { BACKEND_AVAILABLE, errorMessage } from "@epoch/lib/ipc";
 
 export async function refreshRecent(): Promise<void> {
   try {

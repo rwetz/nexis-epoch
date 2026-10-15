@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn, Icon, Input, Switch } from "@nexis/design";
-import type { ScalarValue, TomlNode } from "@/types/backend";
+import type { ScalarValue, TomlNode } from "@epoch/types/backend";
 
 /**
  * The structured view of a TOML document: tables, arrays and values, with

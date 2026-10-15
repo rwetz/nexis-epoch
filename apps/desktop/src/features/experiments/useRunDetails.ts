@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { RunDetail } from "@/types/backend";
+import type { RunDetail } from "@epoch/types/backend";
 import { useExperiments } from "./store";
 
 export type RunView = {

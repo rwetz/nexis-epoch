@@ -1,14 +1,9 @@
-mod commands;
-mod error;
+//! The standalone Nexis Epoch app. Everything Epoch does is in
+//! `tauri-plugin-epoch` (which Nexis's Epoch window registers too); this
+//! crate adds only what belongs to a separate app: its window, the OS
+//! plugins, and the loopback link channel to a running Nexis (links.rs).
+
 mod links;
-mod state;
-
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex, RwLock};
-
-use tauri::Manager;
-
-use crate::state::{AppPaths, AppState};
 
 #[cfg(target_os = "linux")]
 fn is_nvidia() -> bool {
@@ -55,60 +50,15 @@ pub fn run() {
         .manage(links::PendingLinks::default())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_epoch::init())
         .setup(move |app| {
             links::start_listener(app.handle().clone());
             if let Some(url) = &launch_link {
                 links::queue_launch_link(app.handle(), url);
             }
-            let paths = AppPaths {
-                config_dir: app.path().app_config_dir()?,
-                data_dir: app.path().app_data_dir()?,
-            };
-            let store = epoch_store::Store::open(&paths.data_dir.join("epoch.db"))?;
-            let (settings, warnings) = commands::settings::initial(&paths.config_dir);
-            for w in warnings {
-                eprintln!("settings: {w}");
-            }
-            app.manage(Arc::new(AppState {
-                paths,
-                store: Mutex::new(store),
-                settings: RwLock::new(settings),
-                project: RwLock::new(None),
-                queries: Mutex::new(HashMap::new()),
-                system: Mutex::new(commands::system::SystemProbe::new()),
-            }));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            commands::settings::app_info,
-            commands::settings::settings_get,
-            commands::settings::settings_save,
-            commands::settings::layout_load,
-            commands::settings::layout_save,
-            commands::settings::layout_delete,
-            commands::project::project_open,
-            commands::project::project_close,
-            commands::project::project_current,
-            commands::project::project_rescan,
-            commands::project::project_recent,
-            commands::project::project_forget,
-            commands::project::project_files,
-            commands::project::fs_list_dir,
-            commands::project::fs_read_text,
-            commands::project::fs_write_text,
-            commands::config::toml_parse,
-            commands::config::toml_set_value,
-            commands::data::dataset_describe,
-            commands::data::dataset_page,
-            commands::data::dataset_stats,
-            commands::data::sql_run,
-            commands::data::sql_register_view,
-            commands::data::query_cancel,
-            commands::experiments::experiments_index,
-            commands::experiments::experiments_list,
-            commands::experiments::experiment_detail,
-            commands::experiments::experiment_artifact,
-            commands::system::system_status,
             links::links_take_pending,
             links::nexis_open,
         ])

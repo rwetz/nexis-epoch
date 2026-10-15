@@ -20,13 +20,13 @@ import {
   toast,
   useTheme,
 } from "@nexis/design";
-import { confirmAction } from "@/components/confirm";
-import { EmptyState } from "@/components/states";
-import { WORKSPACES } from "@/features/workspace/presets";
-import { deleteLayout } from "@/features/workspace/persistence";
-import { api } from "@/lib/api";
-import { BACKEND_AVAILABLE, errorMessage } from "@/lib/ipc";
-import type { AppInfo, AppSettings } from "@/types/backend";
+import { confirmAction } from "@epoch/components/confirm";
+import { EmptyState } from "@epoch/components/states";
+import { WORKSPACES } from "@epoch/features/workspace/presets";
+import { deleteLayout } from "@epoch/features/workspace/persistence";
+import { api } from "@epoch/lib/api";
+import { BACKEND_AVAILABLE, errorMessage } from "@epoch/lib/ipc";
+import type { AppInfo, AppSettings } from "@epoch/types/backend";
 import { useApp } from "../store";
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {

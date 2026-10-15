@@ -11,15 +11,14 @@
  * link, through the running Nexis or by starting it.
  */
 import * as React from "react";
-import { listen } from "@tauri-apps/api/event";
 import { toast } from "@nexis/design";
-import { openPanel, useApp } from "@/app/store";
-import { useExperiments } from "@/features/experiments/store";
-import { openProject } from "@/features/projects/actions";
-import { api } from "@/lib/api";
-import { BACKEND_AVAILABLE, errorMessage } from "@/lib/ipc";
+import { openPanel, useApp } from "@epoch/app/store";
+import { useExperiments } from "@epoch/features/experiments/store";
+import { openProject } from "@epoch/features/projects/actions";
+import { type EpochLink, host, type NexisOpenArgs } from "@epoch/host";
+import { errorMessage } from "@epoch/lib/ipc";
 
-export type EpochLink = { project: string; run: string | null; dataset: string | null };
+export type { EpochLink };
 
 /** Nexis's names for its tools, as its title bar shows them. */
 export const NEXIS_TOOLS = { mlLab: "Synapse", benchmark: "Pulse" } as const;
@@ -69,28 +68,19 @@ async function follow(link: EpochLink): Promise<void> {
 }
 
 /** Follow links for the life of the app: one that launched Epoch, and any
- * that arrive while it runs. */
+ * that arrive while it runs. Delivery is the host's (host.ts). */
 export function useNexisLinks(): void {
   React.useEffect(() => {
-    if (!BACKEND_AVAILABLE) return;
     let queue = Promise.resolve();
-    const drain = () => {
-      void api
-        .linksTakePending()
-        .then((links) => {
-          for (const link of links) queue = queue.then(() => follow(link)).catch(() => {});
-        })
-        .catch(() => {});
-    };
-    drain();
-    const unlisten = listen("epoch://link", drain);
-    return () => void unlisten.then((fn) => fn()).catch(() => {});
+    return host().subscribeLinks((link) => {
+      queue = queue.then(() => follow(link)).catch(() => {});
+    });
   }, []);
 }
 
-async function toNexis(args: Parameters<typeof api.nexisOpen>[0], what: string): Promise<void> {
+async function toNexis(args: NexisOpenArgs, what: string): Promise<void> {
   try {
-    const how = await api.nexisOpen(args);
+    const how = await host().openInNexis(args);
     if (how === "launched") toast(`Starting Nexis for ${what}…`);
   } catch (e) {
     const message = errorMessage(e);

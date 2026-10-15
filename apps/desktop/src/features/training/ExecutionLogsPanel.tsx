@@ -1,11 +1,11 @@
 import * as React from "react";
 import { cn, Input, Segmented, VirtualList } from "@nexis/design";
-import { PanelToolbar, ToolbarTitle } from "@/components/PanelToolbar";
-import { EmptyState, ErrorState, LoadingState } from "@/components/states";
-import { useRunViews } from "@/features/experiments/useRunDetails";
-import { usePanel } from "@/features/workspace/panel-context";
-import { definePanel, stringParams } from "@/features/workspace/registry";
-import { basename } from "@/lib/fileIcons";
+import { PanelToolbar, ToolbarTitle } from "@epoch/components/PanelToolbar";
+import { EmptyState, ErrorState, LoadingState } from "@epoch/components/states";
+import { useRunViews } from "@epoch/features/experiments/useRunDetails";
+import { usePanel } from "@epoch/features/workspace/panel-context";
+import { definePanel, stringParams } from "@epoch/features/workspace/registry";
+import { basename } from "@epoch/lib/fileIcons";
 import { RunFollowToggle } from "./RunFollow";
 
 type Level = "all" | "warn" | "error";

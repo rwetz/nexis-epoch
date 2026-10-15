@@ -265,3 +265,37 @@ export type SystemStatus = {
   gpuAvailable: boolean;
   runningQueries: number;
 };
+
+// epoch-core::model_file
+
+export type TensorInfo = {
+  name: string;
+  dtype: string;
+  /** Numbers, symbolic names (`batch`) or `?`. */
+  shape: string[];
+  elements: number | null;
+};
+
+export type OnnxInfo = {
+  irVersion: number | null;
+  opsets: [string, number][];
+  producer: string | null;
+  graphName: string | null;
+  inputs: TensorInfo[];
+  outputs: TensorInfo[];
+  nodeCount: number;
+  ops: { op: string; count: number }[];
+};
+
+export type ModelFileInfo = {
+  path: string;
+  format: "safetensors" | "onnx";
+  size: number;
+  tensors: TensorInfo[];
+  tensorCount: number;
+  parameters: number;
+  dtypes: [string, number][];
+  metadata: Record<string, string>;
+  onnx: OnnxInfo | null;
+  truncated: boolean;
+};

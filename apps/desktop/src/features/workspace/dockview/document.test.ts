@@ -57,8 +57,8 @@ describe("presetDocument", () => {
     expect(doc.grid.orientation).toBe("HORIZONTAL");
     const columns = doc.grid.root.data as unknown as Node[];
     expect(columns).toHaveLength(3);
-    // Weights 1 : 3 : 1.7 across the canvas.
-    expect(columns[1].size).toBeCloseTo((3 / 5.7) * 1000, 3);
+    // Weights 1.15 : 3 : 1.6 across the canvas.
+    expect(columns[1].size).toBeCloseTo((3 / 5.75) * 1000, 3);
     const stage = leaves(columns[1]).find((g) => g.views.length === 3)!;
     expect(stage.views).toEqual(["dataset-explorer-1", "toml-editor-1", "sql-editor-1"]);
     expect(stage.activeView).toBe("dataset-explorer-1");

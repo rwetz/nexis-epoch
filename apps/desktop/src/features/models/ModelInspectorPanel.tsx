@@ -1,17 +1,18 @@
 import * as React from "react";
 import { PropertyList, SectionLabel, Slider, StatusDot } from "@nexis/design";
-import { MatrixChart } from "@/components/charts/MatrixChart";
-import { PanelToolbar, ToolbarTitle } from "@/components/PanelToolbar";
-import { EmptyState, ErrorState, LoadingState, PlannedNote } from "@/components/states";
-import { statusLabel, statusTone } from "@/features/experiments/ExperimentExplorerPanel";
-import { useRunViews } from "@/features/experiments/useRunDetails";
-import { RunFollowToggle } from "@/features/training/RunFollow";
-import { usePanel } from "@/features/workspace/panel-context";
-import { definePanel, stringParams } from "@/features/workspace/registry";
-import { api } from "@/lib/api";
-import { basename } from "@/lib/fileIcons";
-import { formatBytes, formatTimestamp } from "@/lib/format";
-import type { ArtifactInfo, RunDetail } from "@/types/backend";
+import { MatrixChart } from "@epoch/components/charts/MatrixChart";
+import { PanelToolbar, ToolbarTitle } from "@epoch/components/PanelToolbar";
+import { EmptyState, ErrorState, LoadingState, PlannedNote } from "@epoch/components/states";
+import { statusLabel, statusTone } from "@epoch/features/experiments/ExperimentExplorerPanel";
+import { useRunViews } from "@epoch/features/experiments/useRunDetails";
+import { RunFollowToggle } from "@epoch/features/training/RunFollow";
+import { usePanel } from "@epoch/features/workspace/panel-context";
+import { definePanel, stringParams } from "@epoch/features/workspace/registry";
+import { api } from "@epoch/lib/api";
+import { basename } from "@epoch/lib/fileIcons";
+import { ModelFileView } from "./ModelFileView";
+import { formatBytes, formatTimestamp } from "@epoch/lib/format";
+import type { ArtifactInfo, RunDetail } from "@epoch/types/backend";
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 
@@ -109,7 +110,25 @@ function ConfusionMatrices({ detail }: { detail: RunDetail }) {
   );
 }
 
+/** A weights file opened from the project explorer. */
+function ModelFile({ path }: { path: string }) {
+  return (
+    <>
+      <PanelToolbar>
+        <ToolbarTitle icon="brain">{basename(path)}</ToolbarTitle>
+      </PanelToolbar>
+      <ModelFileView key={path} path={path} />
+    </>
+  );
+}
+
 function ModelInspector() {
+  const panel = usePanel("model-inspector");
+  if (panel.params.path) return <ModelFile path={panel.params.path} />;
+  return <RunModel />;
+}
+
+function RunModel() {
   const panel = usePanel("model-inspector");
   const [view] = useRunViews(panel.params.runDir, "focused");
   const toolbar = (
@@ -120,7 +139,14 @@ function ModelInspector() {
     </PanelToolbar>
   );
   if (!view) {
-    return <EmptyState icon="brain" title="No run focused" description="Select a run in Experiments to inspect what it trained." />;
+    return (
+      <EmptyState
+        className="epoch-empty"
+        icon="brain"
+        title="No run focused"
+        description="Select a run in Experiments, or open a .safetensors or .onnx file from the project."
+      />
+    );
   }
   if (view.state.status !== "ready") {
     return (
@@ -163,7 +189,7 @@ function ModelInspector() {
             <PropertyList items={d.checkpoints.map((c) => ({ label: c.name, value: formatBytes(c.size), mono: true }))} />
           )}
         </div>
-        <PlannedNote>Architecture diagrams, and reading Safetensors/ONNX headers, come with the model tooling milestone.</PlannedNote>
+        <PlannedNote>Architecture diagrams come with the model tooling milestone. Weight files (.safetensors, .onnx) already open here from the project explorer.</PlannedNote>
       </div>
     </>
   );
@@ -173,11 +199,11 @@ export const modelInspectorPanel = definePanel({
   type: "model-inspector",
   title: "Model",
   icon: "brain",
-  description: "What a run trained: its configuration, checkpoints and evaluation artifacts.",
+  description: "What a run trained (configuration, checkpoints, evaluation) or what a weights file holds.",
   component: ModelInspector,
-  parseParams: (raw) => stringParams(raw, ["runDir"] as const),
-  tabTitle: (p) => (p.runDir ? `Model · ${basename(p.runDir)}` : null),
+  parseParams: (raw) => stringParams(raw, ["runDir", "path"] as const),
+  tabTitle: (p) => (p.path ? basename(p.path) : p.runDir ? `Model · ${basename(p.runDir)}` : null),
   placement: "stage",
   maturity: "partial",
-  limitations: "Reads run snapshots and confusion matrices. Architecture diagrams and weight-file inspection are planned.",
+  limitations: "Reads run snapshots, confusion matrices and Safetensors/ONNX headers. Architecture diagrams are planned.",
 });

@@ -1,6 +1,6 @@
 import { Button, cn, Icon, SidebarNav, type SidebarNavSection } from "@nexis/design";
-import type { WorkspaceId } from "@/features/workspace/types";
-import { useExperiments } from "@/features/experiments/store";
+import type { WorkspaceId } from "@epoch/features/workspace/types";
+import { useExperiments } from "@epoch/features/experiments/store";
 import { type Location, type PageId, useApp } from "./store";
 
 type NavId = PageId | `ws:${WorkspaceId}`;
@@ -33,13 +33,13 @@ export function Sidebar() {
       items: [
         { id: "ws:studio", label: "Studio", icon: "grid" },
         { id: "ws:data", label: "Datasets", icon: "database", meta: project?.datasets.length || undefined },
-        { id: "ws:experiments", label: "Experiments", icon: "chart-line", meta: runs || undefined },
+        { id: "ws:experiments", label: "Experiments", icon: "layers", meta: runs || undefined },
         { id: "ws:models", label: "Models", icon: "brain" },
-        { id: "ws:config", label: "Configs", icon: "settings", meta: project?.trainConfigs.length || undefined },
+        { id: "ws:config", label: "Configs", icon: "file-code", meta: project?.trainConfigs.length || undefined },
         { id: "pipelines", label: "Pipelines", icon: "nodes" },
       ],
     },
-    { items: [{ id: "settings", label: "Settings", icon: "wrench" }] },
+    { items: [{ id: "settings", label: "Settings", icon: "settings" }] },
   ];
 
   return (

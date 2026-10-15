@@ -4,6 +4,10 @@
 /* The docking layout's structural styles; its colours are remapped below. */
 @import "dockview-react/dist/styles/dockview.css";
 
+/* Tailwind scans this source explicitly: Nexis builds it from its
+ * node_modules, where automatic source detection does not look. */
+@source ".";
+
 /* App-specific rules only below this line. Anything general belongs
  * upstream in @nexis/design. */
 
@@ -38,9 +42,9 @@
 .dockview-theme-epoch {
   --dv-overlay-z-index: 999;
   --dv-tabs-and-actions-container-font-size: 12px;
-  --dv-tabs-and-actions-container-height: 32px;
+  --dv-tabs-and-actions-container-height: 34px;
   --dv-tab-font-size: 12px;
-  --dv-tab-margin: 4px 1px;
+  --dv-tab-margin: 5px 1px;
   --dv-tab-border-radius: 7px;
   --dv-tab-close-icon-size: inherit;
   --dv-border-radius: 10px;
@@ -62,7 +66,7 @@
   --dv-paneview-active-outline-color: var(--ring);
 
   --dv-group-view-background-color: var(--card);
-  --dv-tabs-and-actions-container-background-color: color-mix(in oklab, var(--card) 70%, var(--background));
+  --dv-tabs-and-actions-container-background-color: var(--card);
   --dv-activegroup-visiblepanel-tab-background-color: var(--card);
   --dv-activegroup-hiddenpanel-tab-background-color: transparent;
   --dv-inactivegroup-visiblepanel-tab-background-color: var(--card);
@@ -121,12 +125,56 @@
 .dockview-theme-epoch .dv-groupview.dv-active-group::after {
   box-shadow: inset 0 0 0 1px var(--border);
 }
-/* The selected tab of the focused group carries the one accent. */
+/* Tabs are pills on the card's own surface, so a group reads as one card
+ * with a strip of tabs rather than a bar bolted onto a body. The visible
+ * tab of the focused group carries the one accent (its icon); the others
+ * are told apart by fill alone. */
+.dockview-theme-epoch .dv-tabs-and-actions-container {
+  padding: 0 4px;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+}
+.dockview-theme-epoch .dv-tab {
+  /* Shrink before overflowing, so a narrow group shows a truncated title
+   * instead of a clipped one plus an overflow menu for a single tab. */
+  flex-shrink: 1;
+  min-width: 34px;
+  transition:
+    background-color var(--dur-tap) var(--ease-enter),
+    color var(--dur-tap) var(--ease-enter);
+}
+.dockview-theme-epoch .dv-tab.dv-active-tab {
+  /* The tab you are looking at keeps its full title; background tabs give
+   * way first, down to their icon. */
+  flex-shrink: 0;
+  background-color: color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+.dockview-theme-epoch .dv-tab.dv-inactive-tab .epoch-tab {
+  padding-right: 9px;
+}
+/* Background tabs don't reserve room for a close button; it appears over
+ * the end of the title on hover, so the strip never shifts. */
+.dockview-theme-epoch .dv-tab.dv-inactive-tab .epoch-tab {
+  position: relative;
+}
+.dockview-theme-epoch .dv-tab.dv-inactive-tab .epoch-tab-close {
+  position: absolute;
+  right: 3px;
+  background-color: var(--card);
+  box-shadow: -8px 0 8px var(--card);
+}
+.dockview-theme-epoch .dv-tab.dv-inactive-tab .epoch-tab-close:hover {
+  background-color: var(--accent);
+}
 .dockview-theme-epoch .dv-groupview.dv-active-group .dv-tab.dv-active-tab {
-  box-shadow: inset 0 2px 0 var(--brand);
+  background-color: color-mix(in oklab, var(--foreground) 9%, transparent);
+}
+.dockview-theme-epoch .dv-groupview.dv-active-group .dv-tab.dv-active-tab .epoch-tab-icon {
+  color: var(--brand);
+  opacity: 1;
 }
 .dockview-theme-epoch .dv-tab:not(.dv-active-tab):hover {
-  background-color: color-mix(in oklab, var(--foreground) 6%, transparent);
+  background-color: color-mix(in oklab, var(--foreground) 4%, transparent);
+  color: var(--foreground);
 }
 .dockview-theme-epoch .dv-resize-container {
   border-radius: var(--dv-border-radius);
@@ -140,8 +188,15 @@
   min-width: 0;
   max-width: 220px;
   align-items: center;
-  gap: 6px;
-  padding: 0 4px 0 10px;
+  gap: 7px;
+  padding: 0 4px 0 9px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+.epoch-tab-icon {
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: color var(--dur-tap) var(--ease-enter);
 }
 .epoch-tab-close {
   display: grid;
@@ -183,6 +238,7 @@
 
 /* Panel bodies own their scrolling; the view surface should not add any. */
 .epoch-panel {
+  container-type: inline-size;
   display: flex;
   height: 100%;
   min-height: 0;
@@ -211,4 +267,62 @@
 }
 .epoch-editor .cm-scroller {
   font-family: var(--font-mono);
+}
+
+/* ── Entrances ──────────────────────────────────────────────────────────
+ * The window arrives the way Nexis's tool windows do (globals.css
+ * `nexis-window-enter`): it settles in, the title bar drops, the body rises
+ * behind it. Pages and workspaces then fade up whenever they are switched
+ * to. These use `backwards` fill, not `both`, so nothing is left with a
+ * transform once the animation ends: a lingering transform would become the
+ * containing block for dockview's floating groups and drag overlays. */
+@keyframes epoch-view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+  }
+}
+@keyframes epoch-fade-enter {
+  from {
+    opacity: 0;
+  }
+}
+.epoch-shell-header {
+  animation: nexis-window-header-enter 380ms var(--ease-enter) 90ms backwards;
+}
+.epoch-shell-body {
+  animation: epoch-view-enter var(--dur-scene) var(--ease-enter) 150ms backwards;
+}
+.epoch-shell-status {
+  animation: epoch-fade-enter var(--dur-scene) var(--ease-enter) 260ms backwards;
+}
+.epoch-view-enter,
+.epoch-workspace[data-active="true"] {
+  animation: epoch-view-enter 260ms var(--ease-enter) backwards;
+}
+/* Panel content arriving after a load (data, a run, a file). */
+.epoch-content-enter {
+  animation: epoch-fade-enter 220ms var(--ease-enter) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .epoch-shell-header,
+  .epoch-shell-body,
+  .epoch-shell-status,
+  .epoch-view-enter,
+  .epoch-workspace[data-active="true"],
+  .epoch-content-enter {
+    animation: none;
+  }
+}
+
+/* Narrow panels (a side column of the Studio layout): the empty states
+ * keep their words on a line instead of stacking one per row. */
+@container (max-width: 260px) {
+  .epoch-empty {
+    padding: 12px;
+    gap: 8px;
+  }
+  .epoch-empty [data-slot="empty-icon"] {
+    display: none;
+  }
 }

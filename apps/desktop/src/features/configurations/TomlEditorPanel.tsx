@@ -1,16 +1,16 @@
 import * as React from "react";
 import { Badge, Button, cn, Icon, toast } from "@nexis/design";
-import { confirmAction } from "@/components/confirm";
-import { CodeEditor, type CodeEditorHandle } from "@/components/editor/CodeEditor";
-import { PanelToolbar, ToolbarButton, ToolbarTitle } from "@/components/PanelToolbar";
-import { EmptyState, ErrorState, LoadingState } from "@/components/states";
-import { useApp } from "@/app/store";
-import { usePanel } from "@/features/workspace/panel-context";
-import { definePanel, stringParams } from "@/features/workspace/registry";
-import { api } from "@/lib/api";
-import { basename } from "@/lib/fileIcons";
-import { BackendError, errorMessage } from "@/lib/ipc";
-import type { ParseReport, ScalarValue, TomlNode } from "@/types/backend";
+import { confirmAction } from "@epoch/components/confirm";
+import { CodeEditor, type CodeEditorHandle } from "@epoch/components/editor/CodeEditor";
+import { PanelToolbar, ToolbarButton, ToolbarTitle } from "@epoch/components/PanelToolbar";
+import { EmptyState, ErrorState, LoadingState } from "@epoch/components/states";
+import { useApp } from "@epoch/app/store";
+import { usePanel } from "@epoch/features/workspace/panel-context";
+import { definePanel, stringParams } from "@epoch/features/workspace/registry";
+import { api } from "@epoch/lib/api";
+import { basename } from "@epoch/lib/fileIcons";
+import { BackendError, errorMessage } from "@epoch/lib/ipc";
+import type { ParseReport, ScalarValue, TomlNode } from "@epoch/types/backend";
 import { TomlInspector } from "./TomlInspector";
 
 type Loaded = { savedText: string; hash: string };
@@ -211,7 +211,7 @@ function TomlFile({ path }: { path: string }) {
 export const tomlEditorPanel = definePanel({
   type: "toml-editor",
   title: "Configuration",
-  icon: "settings",
+  icon: "file-code",
   description: "Edit TOML with validation, a structured view and format-preserving value edits.",
   component: TomlEditor,
   parseParams: (raw) => stringParams(raw, ["path"] as const),

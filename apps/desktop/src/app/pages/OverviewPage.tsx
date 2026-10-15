@@ -1,11 +1,11 @@
 import { Button, cn, Icon, type IconName, SceneEnter, SectionLabel, Stat } from "@nexis/design";
-import { AppLogo } from "@/AppLogo";
-import { openFile } from "@/features/projects/ProjectExplorerPanel";
-import { chooseAndOpenProject, openProject } from "@/features/projects/actions";
-import { useExperiments } from "@/features/experiments/store";
-import { WORKSPACES } from "@/features/workspace/presets";
-import { fileIcon } from "@/lib/fileIcons";
-import { formatBytes, formatRelativeTime } from "@/lib/format";
+import { AppLogo } from "@epoch/AppLogo";
+import { openFile } from "@epoch/features/projects/ProjectExplorerPanel";
+import { chooseAndOpenProject, openProject } from "@epoch/features/projects/actions";
+import { useExperiments } from "@epoch/features/experiments/store";
+import { WORKSPACES } from "@epoch/features/workspace/presets";
+import { fileIcon } from "@epoch/lib/fileIcons";
+import { formatBytes, formatRelativeTime } from "@epoch/lib/format";
 import { useApp } from "../store";
 
 function Card({ children, className }: { children: React.ReactNode; className?: string }) {

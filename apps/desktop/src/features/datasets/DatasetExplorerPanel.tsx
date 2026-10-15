@@ -12,17 +12,17 @@ import {
   SelectValue,
   toast,
 } from "@nexis/design";
-import { DataGrid } from "@/components/DataGrid";
-import { PanelToolbar, ToolbarButton, ToolbarTitle } from "@/components/PanelToolbar";
-import { EmptyState, ErrorState, LoadingState } from "@/components/states";
-import { openPanel, useApp } from "@/app/store";
-import { usePanel } from "@/features/workspace/panel-context";
-import { definePanel, stringParams } from "@/features/workspace/registry";
-import { api } from "@/lib/api";
-import { basename, fileIcon } from "@/lib/fileIcons";
-import { formatBytes, formatCount, formatDuration } from "@/lib/format";
-import { errorMessage, newQueryId } from "@/lib/ipc";
-import type { Column, DatasetInfo, Filter, FilterOp, QueryResult, Sort } from "@/types/backend";
+import { DataGrid } from "@epoch/components/DataGrid";
+import { PanelToolbar, ToolbarButton, ToolbarTitle } from "@epoch/components/PanelToolbar";
+import { EmptyState, ErrorState, LoadingState } from "@epoch/components/states";
+import { openPanel, useApp } from "@epoch/app/store";
+import { usePanel } from "@epoch/features/workspace/panel-context";
+import { definePanel, stringParams } from "@epoch/features/workspace/registry";
+import { api } from "@epoch/lib/api";
+import { basename, fileIcon } from "@epoch/lib/fileIcons";
+import { formatBytes, formatCount, formatDuration } from "@epoch/lib/format";
+import { errorMessage, newQueryId } from "@epoch/lib/ipc";
+import type { Column, DatasetInfo, Filter, FilterOp, QueryResult, Sort } from "@epoch/types/backend";
 import { usePageCache } from "./pageCache";
 
 const OPS: { id: FilterOp; label: string; needsValue: boolean }[] = [

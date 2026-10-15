@@ -10,6 +10,7 @@ import type {
   FileIndex,
   IndexedRun,
   IndexStats,
+  ModelFileInfo,
   LoadedSettings,
   Opened,
   Page,
@@ -23,8 +24,7 @@ import type {
   ScalarValue,
   SystemStatus,
   TextFile,
-} from "@/types/backend";
-import type { EpochLink } from "@/features/links/links";
+} from "@epoch/types/backend";
 import { call } from "./ipc";
 
 export const api = {
@@ -67,15 +67,7 @@ export const api = {
   experimentArtifact: (runDir: string, path: string) =>
     call<unknown>("experiment_artifact", { runDir, path }),
 
-  systemStatus: () => call<SystemStatus>("system_status"),
+  modelInspect: (path: string) => call<ModelFileInfo>("model_inspect", { path }),
 
-  // Links with Nexis (src-tauri/src/links.rs).
-  linksTakePending: () => call<EpochLink[]>("links_take_pending"),
-  nexisOpen: (args: { tool: "ml-lab" | "benchmark"; project?: string; run?: string; model?: string }) =>
-    call<"sent" | "launched">("nexis_open", {
-      tool: args.tool,
-      project: args.project ?? null,
-      run: args.run ?? null,
-      model: args.model ?? null,
-    }),
+  systemStatus: () => call<SystemStatus>("system_status"),
 };

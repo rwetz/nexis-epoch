@@ -5,6 +5,7 @@
 
 pub mod error;
 pub mod fs;
+pub mod model_file;
 pub mod nexis_ml;
 pub mod paths;
 pub mod project;

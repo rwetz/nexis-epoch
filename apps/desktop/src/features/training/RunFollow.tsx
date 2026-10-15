@@ -1,5 +1,5 @@
-import { ToolbarButton } from "@/components/PanelToolbar";
-import { useExperiments } from "@/features/experiments/store";
+import { ToolbarButton } from "@epoch/components/PanelToolbar";
+import { useExperiments } from "@epoch/features/experiments/store";
 
 /**
  * Pin a panel to the focused run, or let it follow the selection again.

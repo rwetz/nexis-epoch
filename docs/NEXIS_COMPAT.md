@@ -79,7 +79,13 @@ Verified against real data, as the brief asked:
 ## Links with Nexis
 
 Nexis names its ML tools **Synapse** (the ML Lab, tool id `ml-lab`) and
-**Pulse** (Benchmark, tool id `benchmark`). The three tools link both ways:
+**Pulse** (Benchmark, tool id `benchmark`). Since 0.4.0 Nexis also has an
+**Epoch window** that runs this repo's UI and backend (docs/ARCHITECTURE.md,
+"Two hosts, one source"). Inside Nexis, links between the three are window
+launch parameters, handled by the Epoch window's host (`project`, `run`,
+`dataset`; Nexis `src/windows/epoch.tsx`). The table below is the
+**standalone** app's channel, which still links Epoch and a running Nexis
+both ways:
 
 | From | Action | Link |
 |---|---|---|

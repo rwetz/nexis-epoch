@@ -6,6 +6,7 @@ members = [
     "crates/epoch-store",
     "crates/epoch-data",
     "crates/epoch-runtime",
+    "crates/tauri-plugin-epoch",
     "apps/desktop/src-tauri",
 ]
 # The desktop crate pulls in Tauri and DuckDB; `cargo test` at the root runs
@@ -18,11 +19,12 @@ default-members = [
 ]
 
 [workspace.package]
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 rust-version = "1.85"
 authors = ["Ryan Wetzstein"]
 repository = "https://github.com/rwetz/nexis-epoch"
+license = "MIT"
 
 [workspace.dependencies]
 epoch-core = { path = "crates/epoch-core" }
@@ -30,6 +32,7 @@ epoch-config = { path = "crates/epoch-config" }
 epoch-store = { path = "crates/epoch-store" }
 epoch-data = { path = "crates/epoch-data" }
 epoch-runtime = { path = "crates/epoch-runtime" }
+tauri-plugin-epoch = { path = "crates/tauri-plugin-epoch" }
 
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"

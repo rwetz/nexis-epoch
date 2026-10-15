@@ -7,7 +7,12 @@ Read `docs/ARCHITECTURE.md` first; it is short.
   `<Icon name>` only, no emoji, every action in the command palette).
 - **Only `apps/desktop/src/features/workspace/dockview/` may import dockview.**
   Panels use `usePanel()`; new panels follow docs/DEVELOPMENT.md "Adding a panel".
-- **Logic goes in the crates**, not in `src-tauri/src/commands` (thin adapters).
+- **Logic goes in the crates**, not in `crates/tauri-plugin-epoch/src/commands`
+  (thin adapters). Every Epoch command lives in that plugin; the standalone
+  app (`apps/desktop/src-tauri`) adds only its window and the Nexis link
+  channel. **Nexis builds this frontend into its Epoch window** (from
+  `apps/desktop/src/embed.tsx`), so nothing may branch on the host except
+  through `src/host.ts`, and imports use `@epoch/…`, never `@/…`.
   Keep crates free of Tauri/React dependencies.
 - **Never run project code** as a side effect of opening or reading a project.
 - Changing a Rust type returned by a command → update `src/types/backend.ts`
