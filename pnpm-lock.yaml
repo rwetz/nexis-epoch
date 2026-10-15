@@ -118,8 +118,8 @@ importers:
         version: 5.0.15(@types/react@19.3.0)(react@19.3.0)
     devDependencies:
       '@nexis/design':
-        specifier: github:rwetz/nexis-design#5804c3241719ca1e838296e5b1276327c7756cea
-        version: https://codeload.github.com/rwetz/nexis-design/tar.gz/5804c3241719ca1e838296e5b1276327c7756cea(@fontsource-variable/geist-mono@5.3.0)(@fontsource-variable/geist@5.3.0)(@fontsource-variable/space-grotesk@5.3.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@tanstack/react-virtual@3.14.15(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@tauri-apps/api@2.12.3)(@tauri-apps/plugin-os@2.4.0)(class-variance-authority@0.7.1)(clsx@2.1.1)(cmdk@1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(motion@13.5.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(radix-ui@1.7.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-resizable-panels@4.14.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(sonner@2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(tailwind-merge@3.7.0)(tailwindcss@4.3.3)(tw-animate-css@1.4.0)
+        specifier: github:rwetz/nexis-design#0faf63832323a423e7e9353e8b63d9f1aed30213
+        version: https://codeload.github.com/rwetz/nexis-design/tar.gz/0faf63832323a423e7e9353e8b63d9f1aed30213(@fontsource-variable/geist-mono@5.3.0)(@fontsource-variable/geist@5.3.0)(@fontsource-variable/space-grotesk@5.3.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@tanstack/react-virtual@3.14.15(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@tauri-apps/api@2.12.3)(@tauri-apps/plugin-os@2.4.0)(class-variance-authority@0.7.1)(clsx@2.1.1)(cmdk@1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(motion@13.5.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(radix-ui@1.7.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-resizable-panels@4.14.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(sonner@2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(tailwind-merge@3.7.0)(tailwindcss@4.3.3)(tw-animate-css@1.4.0)
       '@tailwindcss/vite':
         specifier: ^4.2.3
         version: 4.3.3(vite@7.3.7(@types/node@24.19.2)(jiti@2.7.0)(lightningcss@1.32.0))
@@ -538,8 +538,8 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@nexis/design@https://codeload.github.com/rwetz/nexis-design/tar.gz/5804c3241719ca1e838296e5b1276327c7756cea':
-    resolution: {gitHosted: true, integrity: sha512-oq6c0eni4bxvSgLrBbDaI0YtSewznKTI8Z9uxe97/fu69xxivtA1IUr4+HSqIpOAF8J5344BIv2m+R0gRg0Cqg==, tarball: https://codeload.github.com/rwetz/nexis-design/tar.gz/5804c3241719ca1e838296e5b1276327c7756cea}
+  '@nexis/design@https://codeload.github.com/rwetz/nexis-design/tar.gz/0faf63832323a423e7e9353e8b63d9f1aed30213':
+    resolution: {gitHosted: true, integrity: sha512-btPaDphBSNc0VuL9jzd9QLnuAZaAvikPciVzW9ln4p5dGNyqgjrxUoiBcEHe/f4S9En2d3SUFyG5qOnciW0T6A==, tarball: https://codeload.github.com/rwetz/nexis-design/tar.gz/0faf63832323a423e7e9353e8b63d9f1aed30213}
     version: 0.2.0
     hasBin: true
     peerDependencies:
@@ -2711,7 +2711,7 @@ snapshots:
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     optional: true
 
-  ? '@nexis/design@https://codeload.github.com/rwetz/nexis-design/tar.gz/5804c3241719ca1e838296e5b1276327c7756cea(@fontsource-variable/geist-mono@5.3.0)(@fontsource-variable/geist@5.3.0)(@fontsource-variable/space-grotesk@5.3.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@tanstack/react-virtual@3.14.15(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@tauri-apps/api@2.12.3)(@tauri-apps/plugin-os@2.4.0)(class-variance-authority@0.7.1)(clsx@2.1.1)(cmdk@1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(motion@13.5.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(radix-ui@1.7.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-resizable-panels@4.14.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(sonner@2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(tailwind-merge@3.7.0)(tailwindcss@4.3.3)(tw-animate-css@1.4.0)'
+  ? '@nexis/design@https://codeload.github.com/rwetz/nexis-design/tar.gz/0faf63832323a423e7e9353e8b63d9f1aed30213(@fontsource-variable/geist-mono@5.3.0)(@fontsource-variable/geist@5.3.0)(@fontsource-variable/space-grotesk@5.3.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@tanstack/react-virtual@3.14.15(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@tauri-apps/api@2.12.3)(@tauri-apps/plugin-os@2.4.0)(class-variance-authority@0.7.1)(clsx@2.1.1)(cmdk@1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(motion@13.5.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(radix-ui@1.7.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-resizable-panels@4.14.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(sonner@2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(tailwind-merge@3.7.0)(tailwindcss@4.3.3)(tw-animate-css@1.4.0)'
   : dependencies:
       '@fontsource-variable/geist': 5.3.0
       '@fontsource-variable/geist-mono': 5.3.0
