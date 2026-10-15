@@ -43,7 +43,6 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-resizable-panels": "^4.12.3",
-    "shadcn": "^4.3.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3",
@@ -51,7 +50,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@nexis/design": "github:rwetz/nexis-design#c5cdedd883043039db2537ce0a4bc031612f39ea",
+    "@nexis/design": "github:rwetz/nexis-design#5804c3241719ca1e838296e5b1276327c7756cea",
     "@tailwindcss/vite": "^4.2.3",
     "@tauri-apps/cli": "^2.12.0",
     "@types/node": "^24.19.0",
