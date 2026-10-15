@@ -1074,10 +1074,14 @@ dependencies = [
 name = "epoch-runtime"
 version = "0.4.0"
 dependencies = [
+ "dunce",
  "epoch-core",
+ "libc",
  "serde",
+ "serde_json",
+ "tempfile",
  "thiserror 2.0.21",
- "tokio",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

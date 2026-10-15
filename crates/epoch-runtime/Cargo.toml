@@ -1,6 +1,6 @@
 [package]
 name = "epoch-runtime"
-description = "Interfaces for running training jobs outside the UI process: job specs, command plans, events and the runtime trait."
+description = "Runs training jobs and scripts outside the UI process: command plans, a local process runtime with live Nexis ML protocol events, and Axon engine detection."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,8 +11,29 @@ license.workspace = true
 [dependencies]
 epoch-core.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 thiserror.workspace = true
-tokio = { workspace = true, features = ["sync"] }
+dunce.workspace = true
 
-[lints]
-workspace = true
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_JobObjects",
+    "Win32_System_Threading",
+] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.190"
+
+[dev-dependencies]
+tempfile.workspace = true
+
+# The workspace forbids unsafe code. This crate denies it instead, so that
+# the two OS modules in `src/sys/` (job objects, process groups) can opt in;
+# nothing else in the crate may.
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

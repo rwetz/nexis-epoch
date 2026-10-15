@@ -1,9 +1,15 @@
-//! Interfaces for running training jobs outside the UI process.
+//! Running training jobs and scripts outside the UI process.
 //!
-//! Milestone 1 defines the shapes only: what a job is, the exact command it
-//! would run, the events it produces and the operations a runtime offers.
-//! Nothing here spawns a process, and nothing in the app calls it yet; see
-//! docs/ROADMAP.md, "Training execution".
+//! - [`JobSpec::plan`] turns a job into the exact process it will start (a
+//!   [`CommandPlan`]), so the user sees it before anything runs and tests
+//!   can assert on it.
+//! - [`LocalRuntime`] starts plans as child processes, streams their stdout
+//!   and stderr line by line, parses Nexis ML protocol events as they
+//!   arrive, and stops them gracefully (`{"cmd":"cancel"}`, then a kill
+//!   after a timeout). On Windows every job runs in its own job object, so
+//!   its children die with it; on Unix, in its own process group.
+//! - [`engine`] finds Axon (the Nexis ML engine) and Python interpreters by
+//!   looking at files, never by running them.
 //!
 //! Two rules are encoded in the types rather than left to callers:
 //!
@@ -11,14 +17,22 @@
 //!   from an explicit user action. Opening a project never runs its code.
 //! - Engines that speak the Nexis ML protocol are launched with
 //!   `--nexis-protocol`, so their stdout is machine-readable and every other
-//!   engine's stdout is treated as plain log lines.
+//!   process's stdout is treated as plain log lines.
+
+pub mod engine;
+mod lines;
+mod local;
+pub mod prepare;
+mod sys;
 
 use std::path::PathBuf;
 use std::time::Duration;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 pub use epoch_core::nexis_ml::protocol::{Control, Event as ProtocolEvent};
+pub use lines::split_args;
+pub use local::{JobNotice, LocalRuntime, Observer, RuntimeOptions};
 
 /// Proof that a person asked for this launch. Deliberately has no
 /// `Default`: the only constructor names the action that produced it.
@@ -45,63 +59,101 @@ impl LaunchConsent {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize)]
+#[serde(transparent)]
 pub struct JobId(pub u64);
 
 /// What to run.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum JobKind {
-    /// A Nexis ML engine (`nexis-ml` Python or `nexis-ml-rs`) training the
-    /// project in `project_dir` from its `train.toml`.
-    NexisMl {
-        engine: PathBuf,
-        project_dir: PathBuf,
-    },
+    /// Axon (or the legacy `nexis-ml` engine) training the ML project in
+    /// the job's working directory from its `train.toml`, the way Nexis's
+    /// Synapse starts it.
+    Axon { engine: PathBuf },
     /// Any Python script, with the interpreter the user chose.
     PythonScript {
         interpreter: PathBuf,
         script: PathBuf,
         args: Vec<String>,
     },
+    /// A program and its arguments as given. For other runtimes and tests;
+    /// the app only builds the two kinds above.
+    Process {
+        program: PathBuf,
+        args: Vec<String>,
+        speaks_protocol: bool,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JobSpec {
-    pub id: JobId,
+    /// Shown in the jobs list ("Train tabular", "Run scripts/eval.py").
+    pub title: String,
+    /// Who the job belongs to; the app uses the project root.
+    pub scope: String,
     pub kind: JobKind,
     pub cwd: PathBuf,
-    /// Extra environment variables. Never credentials in plain text.
+    /// Extra environment variables on top of the app's own. Never
+    /// credentials in plain text.
     pub env: Vec<(String, String)>,
     pub consent: LaunchConsent,
 }
 
-/// The exact process a job would start, as data, so it can be shown to the
+/// The exact process a job will start, as data, so it can be shown to the
 /// user before it runs and asserted on in tests.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommandPlan {
     pub program: PathBuf,
     pub args: Vec<String>,
     pub cwd: PathBuf,
+    /// Set in addition to the inherited environment.
     pub env: Vec<(String, String)>,
-    /// stdout carries Nexis ML protocol events.
+    /// stdout carries Nexis ML protocol events, and stdin takes control
+    /// messages (cancel, pause, resume).
     pub speaks_protocol: bool,
+}
+
+impl CommandPlan {
+    /// The plan as one line a shell user would recognise, quoting
+    /// arguments that contain spaces or quotes. For display only: the
+    /// runtime passes `args` to the OS as a list, never through a shell.
+    pub fn command_line(&self) -> String {
+        std::iter::once(self.program.display().to_string())
+            .chain(self.args.iter().cloned())
+            .map(|a| quote_for_display(&a))
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+}
+
+fn quote_for_display(arg: &str) -> String {
+    if !arg.is_empty() && !arg.contains([' ', '\t', '"', '\'']) {
+        return arg.to_string();
+    }
+    format!("\"{}\"", arg.replace('"', "\\\""))
 }
 
 impl JobSpec {
     pub fn plan(&self) -> CommandPlan {
-        let (program, args, speaks_protocol) = match &self.kind {
-            JobKind::NexisMl {
-                engine,
-                project_dir,
-            } => (
+        plan_for(&self.kind, &self.cwd, &self.env)
+    }
+}
+
+/// The process a job of `kind` started in `cwd` with `extra_env` will be.
+pub fn plan_for(
+    kind: &JobKind,
+    cwd: &std::path::Path,
+    extra_env: &[(String, String)],
+) -> CommandPlan {
+    {
+        let (program, args, speaks_protocol) = match kind {
+            // `<engine> --nexis-protocol train .` from the ML project's
+            // folder: what Nexis runs (src/modules/ml/lib/engine-bridge.ts).
+            JobKind::Axon { engine } => (
                 engine.clone(),
-                vec![
-                    "train".to_string(),
-                    project_dir.display().to_string(),
-                    "--nexis-protocol".to_string(),
-                ],
+                vec!["--nexis-protocol".into(), "train".into(), ".".into()],
                 true,
             ),
             JobKind::PythonScript {
@@ -114,15 +166,30 @@ impl JobSpec {
                 all.extend(args.iter().cloned());
                 (interpreter.clone(), all, false)
             }
+            JobKind::Process {
+                program,
+                args,
+                speaks_protocol,
+            } => (program.clone(), args.clone(), *speaks_protocol),
         };
-        let mut env = self.env.clone();
-        if speaks_protocol {
-            env.push(("NEXIS_ML_PROTOCOL".into(), "1".into()));
+        let mut env = extra_env.to_vec();
+        match kind {
+            JobKind::Axon { .. } => {
+                env.push(("NEXIS_ML_PROTOCOL".into(), "1".into()));
+                // The legacy engine is Python: keep its output UTF-8 when
+                // stdout is a pipe on Windows.
+                env.push(("PYTHONIOENCODING".into(), "utf-8".into()));
+            }
+            JobKind::PythonScript { .. } => {
+                env.push(("PYTHONUNBUFFERED".into(), "1".into()));
+                env.push(("PYTHONIOENCODING".into(), "utf-8".into()));
+            }
+            JobKind::Process { .. } => {}
         }
         CommandPlan {
             program,
             args,
-            cwd: self.cwd.clone(),
+            cwd: cwd.to_path_buf(),
             env,
             speaks_protocol,
         }
@@ -132,13 +199,56 @@ impl JobSpec {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(tag = "state", rename_all = "snake_case")]
 pub enum JobStatus {
+    /// Waiting for a free slot (the concurrency limit).
+    Queued,
     Starting,
-    Running { pid: u32 },
-    Paused,
-    Stopping,
-    Exited { code: Option<i32> },
-    Cancelled,
-    Failed { message: String },
+    Running {
+        pid: u32,
+    },
+    /// Pause was requested; protocol engines pause at the next epoch
+    /// boundary.
+    Paused {
+        pid: u32,
+    },
+    /// Stop was requested; the process has not exited yet.
+    Stopping {
+        pid: u32,
+    },
+    Exited {
+        /// `None` when the process was ended by a signal.
+        code: Option<i32>,
+    },
+    /// Stopped at the user's request. `forced`: it had to be killed.
+    Cancelled {
+        forced: bool,
+    },
+    Failed {
+        message: String,
+    },
+}
+
+impl JobStatus {
+    pub fn is_finished(&self) -> bool {
+        matches!(
+            self,
+            Self::Exited { .. } | Self::Cancelled { .. } | Self::Failed { .. }
+        )
+    }
+
+    /// A process exists (or is being started) for the job.
+    pub fn holds_slot(&self) -> bool {
+        matches!(
+            self,
+            Self::Starting | Self::Running { .. } | Self::Paused { .. } | Self::Stopping { .. }
+        )
+    }
+
+    pub fn pid(&self) -> Option<u32> {
+        match self {
+            Self::Running { pid } | Self::Paused { pid } | Self::Stopping { pid } => Some(*pid),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -148,6 +258,108 @@ pub enum JobEvent {
     Stdout { line: String },
     Stderr { line: String },
     Protocol { event: ProtocolEvent },
+}
+
+/// One event in a job's log, numbered so a reader can resume after the
+/// last one it saw.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JobRecord {
+    pub seq: u64,
+    pub at_ms: u64,
+    pub event: JobEvent,
+}
+
+/// Events after a cursor.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EventPage {
+    pub records: Vec<JobRecord>,
+    /// Pass back as `after` to continue.
+    pub next: u64,
+    /// Events that were dropped from the job's buffer before they could be
+    /// read (the buffer keeps the most recent ones).
+    pub dropped: u64,
+    /// The job has finished and every event has been returned.
+    pub done: bool,
+}
+
+/// What the protocol has told us about a job's run so far.
+#[derive(Debug, Clone, Default, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JobProgress {
+    pub run_id: Option<String>,
+    /// The run's directory, when the engine reported one (`run.started`'s
+    /// `dir`) or it could be derived from the working directory.
+    pub run_dir: Option<PathBuf>,
+    pub device: Option<String>,
+    pub epoch: Option<u64>,
+    pub total_epochs: Option<u64>,
+    /// `run.finished`'s status ("completed", "cancelled", "failed").
+    pub outcome: Option<String>,
+    pub metric_events: u64,
+}
+
+/// A job as the jobs list shows it.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JobInfo {
+    pub id: JobId,
+    pub title: String,
+    pub scope: String,
+    /// "axon", "python_script" or "process".
+    pub kind: &'static str,
+    pub plan: CommandPlan,
+    pub consent: LaunchConsent,
+    pub status: JobStatus,
+    /// Accepts pause/resume (protocol engines only).
+    pub controllable: bool,
+    pub queued_at_ms: u64,
+    pub started_at_ms: Option<u64>,
+    pub finished_at_ms: Option<u64>,
+    pub progress: JobProgress,
+    /// stdout + stderr lines so far.
+    pub output_lines: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum StopMode {
+    /// Ask nicely (`{"cmd":"cancel"}` for protocol engines, which checkpoint
+    /// and finalise the run; SIGTERM to the process group on Unix), then
+    /// kill after the timeout. Windows has no polite signal for a
+    /// windowless process, so a plain script is killed at once there.
+    Graceful {
+        timeout: Duration,
+    },
+    Kill,
+}
+
+pub const DEFAULT_STOP_TIMEOUT: Duration = Duration::from_secs(10);
+
+#[derive(Debug, thiserror::Error)]
+pub enum RuntimeError {
+    #[error("no job {0:?}")]
+    UnknownJob(JobId),
+    #[error("{0:?} does not accept control messages")]
+    NotControllable(JobId),
+    #[error("{0:?} has already finished")]
+    Finished(JobId),
+    #[error("could not start {program}: {message}")]
+    Spawn { program: String, message: String },
+    #[error("could not reach the process: {0}")]
+    Io(String),
+}
+
+/// What any runtime — local processes today, perhaps a remote worker or an
+/// in-process Rust trainer later — must provide.
+pub trait Runtime: Send + Sync {
+    /// Queue a job; it starts as soon as the concurrency limit allows.
+    fn start(&self, spec: JobSpec) -> JobId;
+    fn control(&self, id: JobId, message: Control) -> Result<(), RuntimeError>;
+    fn stop(&self, id: JobId, mode: StopMode) -> Result<(), RuntimeError>;
+    fn status(&self, id: JobId) -> Result<JobStatus, RuntimeError>;
+    fn jobs(&self) -> Vec<JobInfo>;
+    fn events(&self, id: JobId, after: u64, max: usize) -> Result<EventPage, RuntimeError>;
 }
 
 /// Turn one stdout line into an event: protocol events for engines that
@@ -163,44 +375,6 @@ pub fn classify_stdout(line: &str, speaks_protocol: bool) -> JobEvent {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum StopMode {
-    /// Ask nicely (`{"cmd":"cancel"}` for protocol engines, which checkpoint
-    /// and finalise the run), then kill after the timeout.
-    Graceful {
-        timeout: Duration,
-    },
-    Kill,
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum RuntimeError {
-    #[error("no job {0:?}")]
-    UnknownJob(JobId),
-    #[error("{0:?} does not accept control messages")]
-    NotControllable(JobId),
-    #[error("could not start {program}: {message}")]
-    Spawn { program: String, message: String },
-    #[error("limit reached: {0}")]
-    Limit(String),
-}
-
-/// A started job: its id and its event stream.
-pub struct JobHandle {
-    pub id: JobId,
-    pub events: tokio::sync::mpsc::Receiver<JobEvent>,
-}
-
-/// What any runtime — local processes today, perhaps a remote worker or an
-/// in-process Rust trainer later — must provide.
-pub trait Runtime: Send + Sync {
-    fn start(&self, spec: JobSpec) -> Result<JobHandle, RuntimeError>;
-    fn control(&self, id: JobId, message: Control) -> Result<(), RuntimeError>;
-    fn stop(&self, id: JobId, mode: StopMode) -> Result<(), RuntimeError>;
-    fn status(&self, id: JobId) -> Result<JobStatus, RuntimeError>;
-    fn jobs(&self) -> Vec<(JobId, JobStatus)>;
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -209,40 +383,63 @@ mod tests {
         LaunchConsent::from_user_action("test", 0)
     }
 
-    #[test]
-    fn nexis_ml_jobs_request_the_protocol() {
-        let spec = JobSpec {
-            id: JobId(1),
-            kind: JobKind::NexisMl {
-                engine: "nexis-ml".into(),
-                project_dir: "proj".into(),
-            },
-            cwd: "proj".into(),
+    fn spec(kind: JobKind, cwd: &str) -> JobSpec {
+        JobSpec {
+            title: "t".into(),
+            scope: String::new(),
+            kind,
+            cwd: cwd.into(),
             env: vec![],
             consent: consent(),
-        };
-        let plan = spec.plan();
-        assert_eq!(plan.args, ["train", "proj", "--nexis-protocol"]);
+        }
+    }
+
+    #[test]
+    fn axon_jobs_request_the_protocol_like_nexis_does() {
+        let plan = spec(
+            JobKind::Axon {
+                engine: "axon".into(),
+            },
+            "proj",
+        )
+        .plan();
+        assert_eq!(plan.args, ["--nexis-protocol", "train", "."]);
+        assert_eq!(plan.cwd, PathBuf::from("proj"));
         assert!(plan.speaks_protocol);
         assert!(plan.env.contains(&("NEXIS_ML_PROTOCOL".into(), "1".into())));
     }
 
     #[test]
     fn python_scripts_run_unbuffered_with_their_args() {
-        let spec = JobSpec {
-            id: JobId(2),
-            kind: JobKind::PythonScript {
+        let plan = spec(
+            JobKind::PythonScript {
                 interpreter: "python".into(),
                 script: "train.py".into(),
                 args: vec!["--epochs".into(), "3".into()],
             },
-            cwd: ".".into(),
-            env: vec![],
-            consent: consent(),
-        };
-        let plan = spec.plan();
+            ".",
+        )
+        .plan();
         assert_eq!(plan.args, ["-u", "train.py", "--epochs", "3"]);
         assert!(!plan.speaks_protocol);
+        assert!(plan.env.contains(&("PYTHONUNBUFFERED".into(), "1".into())));
+    }
+
+    #[test]
+    fn command_lines_quote_what_needs_it() {
+        let plan = spec(
+            JobKind::PythonScript {
+                interpreter: "C:/My Envs/python.exe".into(),
+                script: "a.py".into(),
+                args: vec!["--name".into(), "say \"hi\"".into(), String::new()],
+            },
+            ".",
+        )
+        .plan();
+        assert_eq!(
+            plan.command_line(),
+            r#""C:/My Envs/python.exe" -u a.py --name "say \"hi\"" """#
+        );
     }
 
     #[test]
@@ -260,5 +457,17 @@ mod tests {
             classify_stdout("loss 0.3", true),
             JobEvent::Stdout { .. }
         ));
+    }
+
+    #[test]
+    fn events_serialize_as_the_frontend_expects() {
+        let status = serde_json::to_value(JobEvent::Status(JobStatus::Running { pid: 7 })).unwrap();
+        assert_eq!(
+            status,
+            serde_json::json!({"type": "status", "state": "running", "pid": 7})
+        );
+        let line = serde_json::to_value(JobEvent::Stderr { line: "x".into() }).unwrap();
+        assert_eq!(line, serde_json::json!({"type": "stderr", "line": "x"}));
+        assert_eq!(serde_json::to_value(JobId(3)).unwrap(), 3);
     }
 }
