@@ -42,6 +42,9 @@ Epoch runs as its own app and as a window inside Nexis, from the same code:
   because `@` belongs to Nexis's sources in that build.
 - Commands are called as `plugin:epoch|<name>` (`lib/ipc.ts`); each host
   grants `epoch:default` to its Epoch window.
+- `@nexis/design` is a peer dependency (and a devDependency for this repo's
+  own installs): it comes from git, and pnpm refuses git-sourced
+  sub-dependencies, so a host installs it directly at the rev Epoch pins.
 
 ## Principles
 
