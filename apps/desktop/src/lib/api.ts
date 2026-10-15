@@ -7,9 +7,13 @@ import type {
   AppSettings,
   DatasetInfo,
   DirListing,
+  EventPage,
   FileIndex,
   IndexedRun,
   IndexStats,
+  CommandPlan,
+  JobInfo,
+  JobRequest,
   ModelFileInfo,
   LoadedSettings,
   Opened,
@@ -17,6 +21,7 @@ import type {
   PageRequest,
   ParseReport,
   PathSeg,
+  PlannedJob,
   ProjectSummary,
   QueryResult,
   RecentProject,
@@ -70,4 +75,15 @@ export const api = {
   modelInspect: (path: string) => call<ModelFileInfo>("model_inspect", { path }),
 
   systemStatus: () => call<SystemStatus>("system_status"),
+
+  /** Reads files only; nothing runs. */
+  jobPlan: (request: JobRequest) => call<PlannedJob>("job_plan", { request }),
+  /** Starts `request` if it still plans to `confirmed` (else `conflict`). */
+  jobStart: (request: JobRequest, confirmed: CommandPlan, action: string) =>
+    call<JobInfo>("job_start", { request, confirmed, action }),
+  jobsList: () => call<JobInfo[]>("jobs_list"),
+  jobEvents: (id: number, after: number, max?: number) => call<EventPage>("job_events", { id, after, max }),
+  jobStop: (id: number, force = false) => call<void>("job_stop", { id, force }),
+  jobPause: (id: number) => call<void>("job_pause", { id }),
+  jobResume: (id: number) => call<void>("job_resume", { id }),
 };

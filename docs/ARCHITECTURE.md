@@ -17,9 +17,9 @@ the map; the code comments carry the detail.
 └───────┬──────────────┬──────────────┬───────────────┬──────────────────┘
         │              │              │               │
   epoch-core     epoch-config    epoch-store     epoch-data      epoch-runtime
-  paths, fs,     TOML parse/     SQLite: recent  DuckDB: schema, job specs,
-  detection,     edit, settings  projects, run   pages, stats,   command plans,
-  Nexis ML       .toml           index           sandboxed SQL   events (interfaces)
+  paths, fs,     TOML parse/     SQLite: recent  DuckDB: schema, command plans,
+  detection,     edit, settings  projects, run   pages, stats,   child processes,
+  Nexis ML       .toml           index           sandboxed SQL   live events, Axon
   run store
 ```
 
@@ -61,7 +61,8 @@ Epoch runs as its own app and as a window inside Nexis, from the same code:
 - **Nothing runs on open.** Opening a project reads files. Python versions
   come from `pyvenv.cfg`, not from launching an interpreter. The only process
   Epoch starts by itself is `nvidia-smi`, for the status bar, when it is on
-  `PATH`.
+  `PATH`. Everything else runs only from the Run confirmation (see "Running
+  things").
 
 ## Crates
 
@@ -71,7 +72,7 @@ Epoch runs as its own app and as a window inside Nexis, from the same code:
 | `epoch-config` | TOML parse → diagnostics (line, UTF-16 column) and a tree; format-preserving value edits; `settings.toml` | `toml_edit`: untouched documents round-trip byte-for-byte; an edited value keeps its surrounding comments and whitespace but is re-spelled (`1_000` → `1000`). Epoch claims no more than that. |
 | `epoch-store` | SQLite: recent projects, the experiment index, key/value | Forward-only migrations via `PRAGMA user_version`; refuses a newer schema. Incremental re-index by file mtime; runs whose files vanished are removed. |
 | `epoch-data` | DuckDB over CSV/TSV/Parquet/JSON/JSONL: describe, paged preview with sort and filters, `SUMMARIZE`, ad-hoc SQL | The only crate that links DuckDB, so the rest builds without it. See "Data layer". |
-| `epoch-runtime` | Job specs, the exact command a job would run, job events, the `Runtime` trait | Interfaces only in milestone 1. A `LaunchConsent` (made only from a user action) is required to describe a job. |
+| `epoch-runtime` | Launch plans (`prepare`), Axon and Python detection (`engine`), the local process runtime (`LocalRuntime`) | Threads, not async. A `LaunchConsent` (made only from a user action) is required to describe a job. The only crate allowed `unsafe` (deny, not forbid), and only in `src/sys/`, for job objects and process groups. |
 
 ## Data layer
 
@@ -157,6 +158,52 @@ imported. A layout from a newer Epoch, another workspace or another adapter
 instead. Unknown panel types are dropped and params repaired
 (`repairDocument`). Saves are debounced (400 ms) and atomic.
 
+## Running things
+
+```
+Run button / palette -> job_plan(request) -> dialog shows the CommandPlan
+                                             | user presses Run
+                        job_start(request, confirmed plan, action)
+                          re-plans; refuses (`conflict`) if it differs
+                          -> LocalRuntime::start(JobSpec + LaunchConsent)
+```
+
+- **What can run.** A request names a project file: a `train.toml` (Axon,
+  `<engine> --nexis-protocol train .` from its folder, as Synapse runs it) or
+  a `.py` (the interpreter from Settings, else a venv in or above the
+  script, else `python3`/`python` on `PATH`; run from the project root with
+  `-u`). Arguments are split like a shell would without expanding anything,
+  and passed as a list, never through a shell. Detection looks at files
+  only: Axon in `.venv`/`venv` from the ML project up to the root and in the
+  venvs detection found, then `PATH`, then Nexis's managed folder
+  (`<local data>/app.nexis.nexis/engine`); `axon` before legacy `nexis-ml`.
+- **The runtime.** Each job gets a stdout reader, a stderr reader and a
+  waiter thread. Lines end at a newline; a bare carriage return redraws the
+  line (so a progress bar is one line), ANSI escapes are removed, long lines
+  are cut. A protocol engine's stdout is parsed with `epoch-core`'s protocol
+  types, and its stdin takes `{"cmd":"pause|resume|cancel"}`. Every event is
+  numbered and kept (the newest 20,000 per job); the UI polls
+  `job_events(id, after)` with a cursor, so a reloaded window, or Nexis's
+  Epoch window opened later, catches up. Two jobs run at once; more wait as
+  `queued`.
+- **Stopping.** Graceful: `cancel` on stdin for protocol engines (they save
+  and finalise the run), SIGTERM to the process group on Unix; killed if
+  still there after 10 s. Windows has no polite signal for a windowless
+  tree, so a plain script is killed at once there. A second Stop kills.
+- **Containment.** No console window on Windows (`CREATE_NO_WINDOW`). Each
+  job runs in its own job object with `KILL_ON_JOB_CLOSE` (Windows) or its
+  own process group (Unix). When a job's main process exits, whatever it
+  started is killed too, and every job is killed when Epoch exits.
+- **The index.** The runtime's observer hears of a `run.started` and of a
+  job's end *before* pollers can see them; the plugin then re-detects the
+  project if the run created a new store, and re-indexes, so a run is
+  listed while it trains and its final state lands when it ends.
+- **Live views.** `features/jobs/live.ts` folds event pages into lines and
+  metric series (x = step, else index, as the run store reads
+  `metrics.jsonl`). Training Metrics draws a run from its job's stream while
+  the job is active and from its files otherwise; Logs follows the job last
+  started or picked from the status bar until a run is selected.
+
 ## Frontend/backend contract
 
 `src/types/backend.ts` mirrors the Rust `serde` types by hand, and
@@ -176,8 +223,8 @@ See [NEXIS_COMPAT.md](NEXIS_COMPAT.md). In short: Epoch reads
 `<project>/.nexis-ml/runs/<id>/` from either engine without modifying it,
 indexes runs into SQLite, and renders metrics, logs, samples, configuration,
 checkpoints and confusion matrices from the files. The protocol types in
-`epoch-core::nexis_ml::protocol` are shared with `epoch-runtime`, so live
-streaming will use the same parser.
+`epoch-core::nexis_ml::protocol` are shared with `epoch-runtime`, which
+parses a running engine's stdout with them.
 
 ## Charts
 

@@ -17,7 +17,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex, RwLock};
 
 use tauri::plugin::{Builder, TauriPlugin};
-use tauri::{Manager, Runtime};
+use tauri::{Manager, RunEvent, Runtime};
 
 pub use error::{CmdResult, CommandError};
 use state::{AppPaths, AppState};
@@ -36,21 +36,43 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             let paths = AppPaths {
                 config_dir: path.config_dir()?.join(EPOCH_IDENTIFIER),
                 data_dir: path.data_dir()?.join(EPOCH_IDENTIFIER),
+                nexis_engine_dir: path.local_data_dir().ok().map(|dir| {
+                    dir.join(epoch_runtime::engine::NEXIS_IDENTIFIER)
+                        .join("engine")
+                }),
             };
             let store = epoch_store::Store::open(&paths.data_dir.join("epoch.db"))?;
             let (settings, warnings) = commands::settings::initial(&paths.config_dir);
             for w in warnings {
                 eprintln!("epoch settings: {w}");
             }
-            app.manage(Arc::new(AppState {
+            let state = Arc::new(AppState {
                 paths,
                 store: Mutex::new(store),
                 settings: RwLock::new(settings),
                 project: RwLock::new(None),
                 queries: Mutex::new(HashMap::new()),
                 system: Mutex::new(commands::system::SystemProbe::new()),
+                jobs: epoch_runtime::LocalRuntime::default(),
+            });
+            // Weak: the runtime lives in the state it reports to.
+            let weak = Arc::downgrade(&state);
+            state.jobs.set_observer(Arc::new(move |info, notice| {
+                if let Some(state) = weak.upgrade() {
+                    commands::jobs::on_notice(&state, info, notice);
+                }
             }));
+            app.manage(state);
             Ok(())
+        })
+        // Jobs end with the app. (Windows would end them anyway when the
+        // job objects close; Unix process groups would outlive us.)
+        .on_event(|app, event| {
+            if matches!(event, RunEvent::Exit) {
+                if let Some(state) = app.try_state::<Arc<AppState>>() {
+                    state.jobs.shutdown();
+                }
+            }
         })
         .invoke_handler(tauri::generate_handler![
             commands::settings::app_info,
@@ -83,6 +105,13 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             commands::experiments::experiment_artifact,
             commands::models::model_inspect,
             commands::system::system_status,
+            commands::jobs::job_plan,
+            commands::jobs::job_start,
+            commands::jobs::jobs_list,
+            commands::jobs::job_events,
+            commands::jobs::job_stop,
+            commands::jobs::job_pause,
+            commands::jobs::job_resume,
         ])
         .build()
 }

@@ -31,6 +31,13 @@ const COMMANDS: &[&str] = &[
     "experiment_artifact",
     "model_inspect",
     "system_status",
+    "job_plan",
+    "job_start",
+    "jobs_list",
+    "job_events",
+    "job_stop",
+    "job_pause",
+    "job_resume",
 ];
 
 fn main() {

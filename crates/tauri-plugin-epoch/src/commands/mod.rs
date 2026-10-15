@@ -5,6 +5,7 @@
 pub mod config;
 pub mod data;
 pub mod experiments;
+pub mod jobs;
 pub mod models;
 pub mod project;
 pub mod settings;

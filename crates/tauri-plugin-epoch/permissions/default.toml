@@ -1,7 +1,7 @@
 "$schema" = "schemas/schema.json"
 
 [default]
-description = "Every Epoch command. Project files are reached only through these, and each confines its paths to the open project; nothing here grants general filesystem or shell access."
+description = "Every Epoch command. Project files are reached only through these, and each confines its paths to the open project; nothing here grants general filesystem or shell access. The job commands start only an Axon engine or a Python interpreter Epoch found itself, on a project file, with a plan the user confirmed."
 permissions = [
   "allow-app-info",
   "allow-settings-get",
@@ -33,4 +33,11 @@ permissions = [
   "allow-experiment-artifact",
   "allow-model-inspect",
   "allow-system-status",
+  "allow-job-plan",
+  "allow-job-start",
+  "allow-jobs-list",
+  "allow-job-events",
+  "allow-job-stop",
+  "allow-job-pause",
+  "allow-job-resume",
 ]

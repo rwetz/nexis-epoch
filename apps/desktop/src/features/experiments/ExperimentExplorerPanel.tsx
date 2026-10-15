@@ -3,6 +3,8 @@ import { Badge, Checkbox, cn, Icon, Input, MOD_KEY, StatusDot, toast, Tooltip, T
 import { PanelToolbar, ToolbarButton, ToolbarTitle } from "@epoch/components/PanelToolbar";
 import { EmptyState, ErrorState, LoadingState } from "@epoch/components/states";
 import { useApp } from "@epoch/app/store";
+import { requestRun } from "@epoch/features/jobs/RunDialog";
+import { trainConfigFor } from "@epoch/features/jobs/live";
 import { definePanel, noParams } from "@epoch/features/workspace/registry";
 import { formatMetric } from "@epoch/lib/format";
 import { errorMessage } from "@epoch/lib/ipc";
@@ -50,6 +52,7 @@ function ExperimentExplorer() {
   const [busy, setBusy] = React.useState(false);
   // The first selected run is the focused one (see store.ts).
   const focused = runs.find((r) => r.runDir === selected[0]) ?? null;
+  const trainConfig = project ? trainConfigFor(project.root, project.trainConfigs, focused?.projectDir) : undefined;
 
   const shown = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -79,6 +82,12 @@ function ExperimentExplorer() {
           Runs
         </ToolbarTitle>
         <span className="flex-1" />
+        <ToolbarButton
+          icon="play"
+          label={trainConfig ? `Train ${trainConfig} with Axon (shows the command first)` : "No train.toml in this project"}
+          onClick={() => trainConfig && requestRun({ kind: "axon", config: trainConfig }, "Train button in the Experiments panel")}
+          disabled={!trainConfig}
+        />
         <ToolbarButton
           icon="brain"
           label={`Open the focused run in ${NEXIS_TOOLS.mlLab} (Nexis)`}

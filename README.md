@@ -14,7 +14,7 @@ It belongs to the [Nexis](https://github.com/rwetz/Nexis) family, built on
 [@nexis/design](https://github.com/rwetz/nexis-design), and reads Nexis ML
 Lab experiments directly, but it is a standalone app.
 
-> **Status: milestone 1 (foundation).** Read the table below before relying
+> **Status: milestone 2 (run things).** Read the table below before relying
 > on anything; it says what has been verified and how.
 
 ## What works
@@ -27,12 +27,14 @@ Lab experiments directly, but it is a standalone app.
 | **Dataset explorer** | Schema, row count, a virtualised paged grid with server-side sort and filters (values bound as parameters), DuckDB `SUMMARIZE` statistics, cancel for slow reads. CSV, TSV, Parquet, JSON, JSONL. Never loads a whole file into the UI. | Rust tests against real CSV/Parquet/JSONL via DuckDB 1.5.5; page-cache unit tests |
 | **SQL editor** | Ad-hoc DuckDB SQL (Ctrl/⌘+Enter), datasets exposed as named views with column completion, row cap, timeout, cancel. Sandboxed: reads only inside the project, cannot write files, change settings or load extensions. | Rust tests: sandbox escape attempts, `SELECT 1; COPY …` smuggling, timeout, cross-thread cancel |
 | **Experiments** | Imports Nexis ML runs (`.nexis-ml/runs`, both engines) read-only into a rebuildable SQLite index; list, filter, focus and compare up to 5 runs. | Rust tests + a test run against two real projects (19 runs) |
-| **Training metrics** | Every recorded metric as its own chart (small multiples), overlaid across selected runs, spike-preserving decimation; pin a panel to one run. | Typecheck + browser render; charts not yet seen with real data in the app |
-| **Logs / Model inspector** | A run's log (level filter, search), generated-text samples, configuration snapshot, checkpoints, per-epoch confusion matrices with an epoch slider. | Same as above |
+| **Run things** | **Run** a `train.toml` with Axon or a `.py` script with the project's Python (Project panel, Experiments toolbar, palette). Each opens a confirmation showing the exact command, folder, environment and where the engine or interpreter was found; nothing runs without that click, and a plan that changed since is refused. Axon is looked for in the project's venvs, then `PATH`, then the engine Nexis installed (`axon`, else legacy `nexis-ml`). Jobs run outside the UI process (no console window; on Windows a job object per job, so children die with it), two at a time (the rest queue); stop is graceful (`{"cmd":"cancel"}`, killed after 10 s), protocol engines pause and resume. | Rust tests on real child processes (spawn, stdout/stderr streaming, protocol parsing, pause/resume, graceful cancel, kill after timeout taking a grandchild with it, queueing, kill on drop); detection and plan tests; vitest for the event folding. **Not yet run end to end in the app** (the plugin is compiled by CI only) |
+| **Jobs** | A jobs list in the status bar (newest job, its epoch or elapsed time; click for every job with stop, pause/resume and output). Runs are indexed when they start and again when they finish, so they appear in Experiments while training. | Typecheck + vitest; not yet seen in the app |
+| **Training metrics** | Every recorded metric as its own chart (small multiples), overlaid across selected runs, spike-preserving decimation; pin a panel to one run. A run that is training draws live from the job's event stream. | Typecheck + browser render; live curves not yet seen in the app |
+| **Logs / Model inspector** | A run's log (level filter, search), generated-text samples, configuration snapshot, checkpoints, per-epoch confusion matrices with an epoch slider. A running job's live stdout, stderr and protocol log lines, following the tail. | Same as above |
 | **Weight files** | `.safetensors` and `.onnx` files open in the Model panel from the project explorer: parameter count, dtypes, every tensor's shape, and for ONNX the graph's inputs/outputs, opsets, producer and operator counts. Headers only; ONNX weights are seeked past, never loaded. PyTorch pickles are refused (loading them can run code). | Rust tests on built fixtures, truncation and bad input; a real nexis-ml-rs export |
 | **Inside Nexis** | The same UI and backend as Nexis's Epoch window: Nexis builds `src/embed.tsx` and registers `tauri-plugin-epoch`, both pinned to one commit of this repo. | Nexis typecheck, tests and production build |
 | **Workspace** | Five workspaces (Studio, Data, Experiments, Models, Config) built from a central panel registry (dockview, MIT); split, tab, drag to dock, float, maximize; multiple instances of a panel; layouts saved per workspace in a versioned format with migrations; reset to default. | Unit tests (migrations, registry, presets); save → reload → restore checked in a browser |
-| **Shell** | Title bar with project, workspace switcher, search (Ctrl/⌘+P: files + commands), command palette (Ctrl/⌘+Shift+P, ~60 commands), collapsible sidebar, status bar (project, Python env, backend, running queries, CPU/memory, NVIDIA GPU when `nvidia-smi` exists), 22 themes × light/dark × high contrast. | Browser render in two themes and both modes |
+| **Shell** | Title bar with project, workspace switcher, search (Ctrl/⌘+P: files + commands), command palette (Ctrl/⌘+Shift+P, ~60 commands), collapsible sidebar, status bar (project, Python env, backend, running queries, jobs, CPU/memory, NVIDIA GPU when `nvidia-smi` exists), 22 themes × light/dark × high contrast. | Browser render in two themes and both modes |
 | **Settings** | Data limits (page size, row limit, timeout, memory, threads), Python interpreter, hidden files, index-on-open; saved to `settings.toml` keeping your comments; appearance; workspace navigation; forget saved layouts. | Rust tests (round trip, per-field fallback, comment preservation) |
 
 **Checked in the release app (Windows).** The CI-built `nexis-epoch.exe` was
@@ -54,9 +56,8 @@ send a run back to Synapse or a model to Pulse. See
 
 Clearly labelled in the app where it shows at all:
 
-- **Running training.** `epoch-runtime` defines jobs, the exact commands and
-  their events, but nothing launches a process. Metrics and logs are read from
-  finished runs' files, not streamed live.
+- **Execution metadata per run** (interpreter, `pip freeze`, git commit and
+  dirty state, hardware), and a setting for the concurrency limit (two).
 - **Schema-driven config forms**, editing run notes/tags, architecture
   diagrams.
 - **More data sources**: SQLite databases, remote databases, image and text
@@ -103,7 +104,7 @@ crates/epoch-core         paths, files, project detection, Nexis ML format,
 crates/epoch-config  TOML parsing/editing, settings.toml
 crates/epoch-store   SQLite: recent projects, experiment index
 crates/epoch-data    DuckDB: datasets and sandboxed SQL
-crates/epoch-runtime job interfaces (no execution yet)
+crates/epoch-runtime local process runtime, Axon detection, command plans
 ```
 
 The crates know nothing about the UI, so a native (GPUI) frontend can reuse

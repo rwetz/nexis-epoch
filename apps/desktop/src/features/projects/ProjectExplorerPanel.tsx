@@ -3,6 +3,8 @@ import { Button, Icon, toast, Tree, type TreeNode } from "@nexis/design";
 import { PanelToolbar, ToolbarButton, ToolbarTitle } from "@epoch/components/PanelToolbar";
 import { EmptyState, ErrorState, LoadingState } from "@epoch/components/states";
 import { openPanel, useApp } from "@epoch/app/store";
+import { requestRun } from "@epoch/features/jobs/RunDialog";
+import { runRequestFor } from "@epoch/features/jobs/live";
 import { definePanel, noParams } from "@epoch/features/workspace/registry";
 import { api } from "@epoch/lib/api";
 import { fileIcon, isTabular } from "@epoch/lib/fileIcons";
@@ -121,11 +123,24 @@ function ProjectExplorer() {
   }
 
   const root = dirs[""];
+  const runnable = selected ? runRequestFor(selected) : null;
   return (
     <>
       <PanelToolbar>
         <ToolbarTitle icon="folder">{project.name}</ToolbarTitle>
         <span className="flex-1" />
+        <ToolbarButton
+          icon="play"
+          label={
+            runnable?.kind === "axon"
+              ? "Train with Axon (shows the command first)"
+              : runnable
+                ? "Run this script (shows the command first)"
+                : "Select a train.toml or a .py file to run it"
+          }
+          disabled={!runnable}
+          onClick={() => runnable && requestRun(runnable, "Run button in the Project panel")}
+        />
         <ToolbarButton icon="collapse" label="Collapse all" onClick={() => setExpanded(new Set())} />
         <ToolbarButton
           icon="refresh"

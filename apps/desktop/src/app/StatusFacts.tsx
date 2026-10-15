@@ -1,5 +1,6 @@
 import * as React from "react";
 import { StatusBar, StatusDot, StatusItem } from "@nexis/design";
+import { JobsStatus } from "@epoch/features/jobs/JobsStatus";
 import { api } from "@epoch/lib/api";
 import { BACKEND_AVAILABLE } from "@epoch/lib/ipc";
 import type { SystemStatus } from "@epoch/types/backend";
@@ -57,13 +58,14 @@ export function StatusFacts() {
           <StatusItem
             title={
               BACKEND_AVAILABLE
-                ? "Running DuckDB queries. Training jobs arrive with the runtime milestone."
+                ? "Running DuckDB queries"
                 : "No backend in a browser preview"
             }
             live
           >
-            {sys ? `${sys.runningQueries} running` : "—"}
+            {sys ? `${sys.runningQueries} ${sys.runningQueries === 1 ? "query" : "queries"}` : "—"}
           </StatusItem>
+          <JobsStatus />
           {sys && (
             <StatusItem icon="cpu" live title={`${sys.cpuCount} logical CPUs · ${sys.memoryUsedMb} / ${sys.memoryTotalMb} MB RAM`}>
               {sys.cpuPercent.toFixed(0)}% · {Math.round((sys.memoryUsedMb / Math.max(1, sys.memoryTotalMb)) * 100)}% mem

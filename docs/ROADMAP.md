@@ -10,20 +10,22 @@ ML import, settings. See the README's status table for what is verified.
 
 ## M2 — Run things
 
-The point at which Epoch stops being read-only.
+The point at which Epoch stops being read-only. Done except the last
+bullet; the README's status table says what has been verified.
 
-- `epoch-runtime` local process runtime: spawn outside the UI process, stream
+- ~~`epoch-runtime` local process runtime: spawn outside the UI process, stream
   stdout/stderr line by line, parse Nexis ML protocol events live, graceful
   stop (`{"cmd":"cancel"}`, then kill after a timeout), pause/resume, exit
   status, a concurrency limit. Windows: no console window; job objects so
-  children die with the job.
-- "Run" for a `train.toml` (Nexis ML engine detection: the project's venv,
+  children die with the job.~~
+- ~~"Run" for a `train.toml` (Axon engine detection: the project's venv,
   `PATH`, the Nexis managed engine dir) and for an arbitrary Python script,
   each behind an explicit confirmation that shows the exact command
-  (`CommandPlan`).
-- Live Training Metrics and Execution Logs for running jobs; a jobs list in
-  the status bar; runs land in the index as they finish.
-- Execution metadata per run: interpreter, package versions (`pip freeze`
+  (`CommandPlan`).~~
+- ~~Live Training Metrics and Execution Logs for running jobs; a jobs list in
+  the status bar; runs land in the index as they finish.~~
+- Still open: the concurrency limit as a setting (fixed at two), and
+  execution metadata per run: interpreter, package versions (`pip freeze`
   output captured at launch), git commit and dirty state, hardware.
 
 ## M3 — Configuration and models

@@ -1,11 +1,13 @@
 import * as React from "react";
-import { Badge, cn, Icon } from "@nexis/design";
+import { Badge, cn, Icon, StatusDot } from "@nexis/design";
 import { SeriesChart, type XYSeries } from "@epoch/components/charts/SeriesChart";
 import { PanelToolbar, ToolbarTitle } from "@epoch/components/PanelToolbar";
 import { EmptyState, ErrorState, LoadingState } from "@epoch/components/states";
 import { SeriesSwatch } from "@epoch/features/experiments/ExperimentExplorerPanel";
 import { runLabel, useExperiments } from "@epoch/features/experiments/store";
 import { useRunViews } from "@epoch/features/experiments/useRunDetails";
+import { isActive, jobForRun } from "@epoch/features/jobs/live";
+import { useFocusedJob, useJobs } from "@epoch/features/jobs/store";
 import { usePanel } from "@epoch/features/workspace/panel-context";
 import { definePanel, stringParams } from "@epoch/features/workspace/registry";
 import { basename } from "@epoch/lib/fileIcons";
@@ -22,13 +24,24 @@ function TrainingMetrics() {
   const views = useRunViews(panel.params.runDir, "all");
   const runs = useExperiments((s) => s.runs);
   const [hidden, setHidden] = React.useState<Set<string>>(new Set());
+  const jobs = useJobs((s) => s.jobs);
+  const live = useJobs((s) => s.live);
+  const focusedJob = useFocusedJob();
 
-  const ready = views.flatMap((v) => (v.state.status === "ready" ? [{ ...v, detail: v.state.detail }] : []));
-  const metrics = React.useMemo(
-    () => [...new Set(ready.flatMap((r) => r.detail.series.map((s) => s.name)))].sort(metricOrder),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [ready.map((r) => r.runDir).join("\n"), ready.length],
-  );
+  // A run a job is writing right now draws from the job's event stream;
+  // every other run from its files.
+  const ready = views.flatMap((v) => {
+    const job = jobForRun(jobs, v.runDir);
+    const stream = job && isActive(job.status) ? live[job.id] : undefined;
+    if (stream) {
+      const series = Object.entries(stream.series).map(([name, points]) => ({ name, points, decimated: false }));
+      return [{ ...v, series, live: true }];
+    }
+    return v.state.status === "ready" ? [{ ...v, series: v.state.detail.series, live: false }] : [];
+  });
+  const metrics = [...new Set(ready.flatMap((r) => r.series.map((s) => s.name)))].sort(metricOrder);
+  const waiting =
+    focusedJob && focusedJob.plan.speaksProtocol && isActive(focusedJob.status) && !focusedJob.progress.runDir ? focusedJob : undefined;
 
   const toolbar = (
     <PanelToolbar>
@@ -41,10 +54,10 @@ function TrainingMetrics() {
   );
 
   if (views.length === 0) {
-    return (
-      <>
-        <EmptyState icon="chart-line" title="No run selected" description="Select runs in Experiments. Tick several to compare their curves." />
-      </>
+    return waiting ? (
+      <EmptyState icon="chart-line" title={`${waiting.title} is starting`} description="Its curves appear here with the first metric." />
+    ) : (
+      <EmptyState icon="chart-line" title="No run selected" description="Select runs in Experiments, or train one. Tick several runs to compare their curves." />
     );
   }
   const failed = views.find((v) => v.state.status === "error");
@@ -70,6 +83,7 @@ function TrainingMetrics() {
           <span key={r.runDir} className="flex items-center gap-1.5 rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10.5px]" title={r.runDir}>
             <SeriesSwatch slot={r.slot} />
             {labelOf(r.runDir)}
+            {r.live && <StatusDot tone="brand" live />}
           </span>
         ))}
         <span className="flex-1" />
@@ -110,10 +124,10 @@ function TrainingMetrics() {
             .filter((m) => !hidden.has(m))
             .map((metric) => {
               const series: XYSeries[] = ready.flatMap((r) => {
-                const s = r.detail.series.find((x) => x.name === metric);
+                const s = r.series.find((x) => x.name === metric);
                 return s ? [{ label: labelOf(r.runDir), points: s.points, slot: r.slot }] : [];
               });
-              const decimated = ready.some((r) => r.detail.series.find((x) => x.name === metric)?.decimated);
+              const decimated = ready.some((r) => r.series.find((x) => x.name === metric)?.decimated);
               return (
                 <section
                   key={metric}
@@ -147,11 +161,10 @@ export const trainingMetricsPanel = definePanel({
   type: "training-metrics",
   title: "Metrics",
   icon: "chart-line",
-  description: "Every recorded metric as a curve, overlaid across the selected runs.",
+  description: "Every recorded metric as a curve, overlaid across the selected runs; live while a run trains.",
   component: TrainingMetrics,
   parseParams: (raw) => stringParams(raw, ["runDir"] as const),
   tabTitle: (p) => (p.runDir ? `Metrics · ${basename(p.runDir)}` : null),
   placement: "side",
-  maturity: "partial",
-  limitations: "Historical runs from their metric logs. Live streaming from a running job comes with training execution.",
+  maturity: "ready",
 });

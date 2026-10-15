@@ -299,3 +299,96 @@ export type ModelFileInfo = {
   onnx: OnnxInfo | null;
   truncated: boolean;
 };
+
+// ── Jobs (epoch-runtime, plugin commands/jobs.rs) ────────────────────────
+
+/** What to run; paths are relative to the open project. */
+export type JobRequest = { kind: "axon"; config: string } | { kind: "python_script"; script: string; args?: string };
+
+export type CommandPlan = {
+  program: string;
+  args: string[];
+  cwd: string;
+  /** Set on top of the inherited environment. */
+  env: [string, string][];
+  speaksProtocol: boolean;
+};
+
+export type ProgramSource = "project_venv" | "path" | "nexis_managed" | "settings";
+export type FoundProgram = { path: string; source: ProgramSource; legacy: boolean };
+
+export type PlannedJob = {
+  title: string;
+  program: FoundProgram;
+  alternatives: FoundProgram[];
+  plan: CommandPlan;
+  commandLine: string;
+};
+
+export type JobStatus =
+  | { state: "queued" }
+  | { state: "starting" }
+  | { state: "running"; pid: number }
+  | { state: "paused"; pid: number }
+  | { state: "stopping"; pid: number }
+  | { state: "exited"; code: number | null }
+  | { state: "cancelled"; forced: boolean }
+  | { state: "failed"; message: string };
+
+/** epoch-core::nexis_ml::protocol::Event. Absent optionals arrive as null. */
+export type ProtocolEvent =
+  | {
+      ev: "run.started";
+      run: string;
+      name: string | null;
+      dir: string | null;
+      config: unknown;
+      totalEpochs: number | null;
+      device: string | null;
+      protocol: number | null;
+      startedAt: string | null;
+    }
+  | { ev: "metric"; run: string; step: number | null; epoch: number | null; name: string; value: number }
+  | { ev: "epoch"; run: string; epoch: number; of: number | null }
+  | { ev: "artifact"; run: string; kind: string; path: string }
+  | { ev: "sample"; run: string; input: unknown; output: unknown }
+  | { ev: "log"; run: string; level: string | null; msg: string }
+  | { ev: "run.finished"; run: string; status: string; summary: unknown };
+
+export type JobEvent =
+  | ({ type: "status" } & JobStatus)
+  | { type: "stdout"; line: string }
+  | { type: "stderr"; line: string }
+  | { type: "protocol"; event: ProtocolEvent };
+
+export type JobRecord = { seq: number; atMs: number; event: JobEvent };
+
+export type EventPage = { records: JobRecord[]; next: number; dropped: number; done: boolean };
+
+export type JobProgress = {
+  runId: string | null;
+  runDir: string | null;
+  device: string | null;
+  epoch: number | null;
+  totalEpochs: number | null;
+  outcome: string | null;
+  metricEvents: number;
+};
+
+export type JobInfo = {
+  id: number;
+  title: string;
+  /** The project root the job was started from. */
+  scope: string;
+  kind: "axon" | "python_script" | "process";
+  plan: CommandPlan;
+  consent: { action: string; atMs: number };
+  status: JobStatus;
+  /** Accepts pause/resume. */
+  controllable: boolean;
+  queuedAtMs: number;
+  startedAtMs: number | null;
+  finishedAtMs: number | null;
+  progress: JobProgress;
+  outputLines: number;
+};

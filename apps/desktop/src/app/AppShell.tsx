@@ -2,6 +2,8 @@ import { useNexisLinks } from "@epoch/features/links/links";
 import * as React from "react";
 import { CommandPalette, MOD_PROP, useCommandPaletteShortcut, WindowResizeEdges } from "@nexis/design";
 import { ConfirmHost } from "@epoch/components/confirm";
+import { bootstrapJobs } from "@epoch/features/jobs/store";
+import { RunDialogHost } from "@epoch/features/jobs/RunDialog";
 import { chooseAndOpenProject, bootstrap } from "@epoch/features/projects/actions";
 import { WorkspaceHost } from "@epoch/features/workspace/WorkspaceHost";
 import { useCommands, useFileCommands } from "./commands";
@@ -41,6 +43,8 @@ export function AppShell() {
   const [palette, setPalette] = React.useState<PaletteMode | null>(null);
 
   React.useEffect(() => void bootstrap(), []);
+  // Jobs may already be running (a reloaded window, or Nexis's Epoch window).
+  React.useEffect(() => bootstrapJobs(), []);
   // Links from Nexis: open a project, a run or a dataset (features/links).
   useNexisLinks();
 
@@ -92,6 +96,7 @@ export function AppShell() {
         placeholder={palette === "search" ? "Search files and commands…" : "Type a command…"}
       />
       <ConfirmHost />
+      <RunDialogHost />
     </div>
   );
 }

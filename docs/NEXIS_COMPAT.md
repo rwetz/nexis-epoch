@@ -63,12 +63,20 @@ Verified against real data, as the brief asked:
 | SQLite index (rebuildable from the files) | `crates/epoch-store/src/lib.rs` |
 | A check against a real project | `crates/epoch-core/tests/real_run_store.rs` (`EPOCH_NEXIS_ML_PROJECT=…`) |
 
+## Running Axon
+
+Epoch starts the engine the way Synapse does (Nexis
+`src/modules/ml/lib/engine-bridge.ts`, `src-tauri/src/modules/ml.rs`):
+`<engine> --nexis-protocol train .` in the ML project's folder, with
+`NEXIS_ML_PROTOCOL=1` and stdin piped for `{"cmd":"cancel|pause|resume"}`.
+The binary is `axon` (Axon 0.9+) or `nexis-ml` (the Python engine and older
+Axon). Epoch finds it by file, never by running `--version`: the project's
+venvs, `PATH`, then the folder Nexis downloads it to
+(`<local data>/app.nexis.nexis/engine`), so an engine installed from Synapse
+is used by Epoch too. Epoch never downloads or installs an engine.
+
 ## Not yet
 
-- **Launching engines.** `epoch-runtime` builds the exact command
-  (`nexis-ml train <dir> --nexis-protocol`, `NEXIS_ML_PROTOCOL=1`) and parses
-  its stdout with the same protocol types, but nothing spawns it yet. Control
-  messages (`cancel`, `pause`, `resume`) are typed and tested.
 - **Writing `notes.json`.** Epoch reads notes/tags/pins; editing them would be
   Epoch's first write into a run store and is deliberately left for later.
 - **`serve`/Playground, HTML report, ONNX export.** Nexis features with no

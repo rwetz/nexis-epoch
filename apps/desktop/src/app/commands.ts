@@ -13,6 +13,10 @@ import {
 } from "@epoch/features/projects/actions";
 import { openFile } from "@epoch/features/projects/ProjectExplorerPanel";
 import { useExperiments } from "@epoch/features/experiments/store";
+import { showJob, stopJob } from "@epoch/features/jobs/JobsStatus";
+import { isActive } from "@epoch/features/jobs/live";
+import { requestRun } from "@epoch/features/jobs/RunDialog";
+import { useJobs } from "@epoch/features/jobs/store";
 import { benchmarkInPulse, NEXIS_TOOLS, openInSynapse } from "@epoch/features/links/links";
 import { WORKSPACES } from "@epoch/features/workspace/presets";
 import { api } from "@epoch/lib/api";
@@ -27,6 +31,7 @@ export function useCommands(): PaletteCommand[] {
   const goTo = useApp((s) => s.goTo);
   const toggleSidebar = useApp((s) => s.toggleSidebar);
   const theme = useTheme();
+  const jobs = useJobs((s) => s.jobs);
 
   return React.useMemo<PaletteCommand[]>(() => {
     const cmds: PaletteCommand[] = [
@@ -91,6 +96,37 @@ export function useCommands(): PaletteCommand[] {
           }
         },
       },
+      // Running things: each opens the confirmation with the exact command.
+      ...(project?.trainConfigs ?? []).map<PaletteCommand>((config) => ({
+        id: `run.axon.${config}`,
+        label: `Train ${config} with Axon…`,
+        group: "Run",
+        icon: "play",
+        keywords: ["run", "train", "axon", "nexis-ml", config],
+        run: () => requestRun({ kind: "axon", config }, "Command palette"),
+      })),
+      ...jobs.flatMap<PaletteCommand>((job) => [
+        {
+          id: `job.show.${job.id}`,
+          label: `Show output: ${job.title}`,
+          group: "Run",
+          icon: "terminal",
+          keywords: ["job", "logs", "output"],
+          run: () => showJob(job),
+        },
+        ...(isActive(job.status)
+          ? [
+              {
+                id: `job.stop.${job.id}`,
+                label: `Stop ${job.title}`,
+                group: "Run",
+                icon: "stop" as const,
+                keywords: ["job", "cancel", "kill"],
+                run: () => stopJob(job),
+              },
+            ]
+          : []),
+      ]),
       ...(project?.experimentStores ?? []).flatMap<PaletteCommand>((store) => {
         const name = store.projectDir.split(/[\\/]/).pop() ?? store.projectDir;
         return [
@@ -141,7 +177,7 @@ export function useCommands(): PaletteCommand[] {
       })),
     ];
     return cmds;
-  }, [project, recent, goTo, toggleSidebar, theme]);
+  }, [project, recent, goTo, toggleSidebar, theme, jobs]);
 }
 
 /** Files in the open project, as palette entries (loaded on demand). */

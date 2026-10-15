@@ -3,6 +3,9 @@ import { cn, Input, Segmented, VirtualList } from "@nexis/design";
 import { PanelToolbar, ToolbarTitle } from "@epoch/components/PanelToolbar";
 import { EmptyState, ErrorState, LoadingState } from "@epoch/components/states";
 import { useRunViews } from "@epoch/features/experiments/useRunDetails";
+import { JobOutput } from "@epoch/features/jobs/JobOutput";
+import { isActive, jobForRun } from "@epoch/features/jobs/live";
+import { useFocusedJob, useJobs } from "@epoch/features/jobs/store";
 import { usePanel } from "@epoch/features/workspace/panel-context";
 import { definePanel, stringParams } from "@epoch/features/workspace/registry";
 import { basename } from "@epoch/lib/fileIcons";
@@ -20,6 +23,8 @@ const LEVEL_CLASS: Record<string, string> = {
 function ExecutionLogs() {
   const panel = usePanel("execution-logs");
   const [view] = useRunViews(panel.params.runDir, "focused");
+  const focusedJob = useFocusedJob();
+  const jobs = useJobs((s) => s.jobs);
   const [level, setLevel] = React.useState<Level>("all");
   const [query, setQuery] = React.useState("");
   const [tab, setTab] = React.useState<"log" | "samples">("log");
@@ -36,8 +41,17 @@ function ExecutionLogs() {
     });
   }, [detail, level, query]);
 
+  // Live output: the job the user is following (unless this panel is
+  // pinned to a run), or the job writing the shown run right now.
+  const runJob = view ? jobForRun(jobs, view.runDir) : undefined;
+  const following = !panel.params.runDir ? focusedJob : undefined;
+  const job = following ?? (runJob && isActive(runJob.status) ? runJob : undefined);
+  if (job) {
+    return <JobOutput job={job} onLeave={following ? () => useJobs.getState().focus(null) : undefined} />;
+  }
+
   if (!view) {
-    return <EmptyState icon="terminal" title="No run focused" description="Select a run in Experiments to read its log." />;
+    return <EmptyState icon="terminal" title="No run focused" description="Select a run in Experiments to read its log, or run something to follow its output." />;
   }
 
   return (
@@ -129,11 +143,10 @@ export const executionLogsPanel = definePanel({
   type: "execution-logs",
   title: "Logs",
   icon: "terminal",
-  description: "A run's log and generated samples, read from its event log.",
+  description: "A run's log and generated samples, or a running job's live output.",
   component: ExecutionLogs,
   parseParams: (raw) => stringParams(raw, ["runDir"] as const),
   tabTitle: (p) => (p.runDir ? `Logs · ${basename(p.runDir)}` : null),
   placement: "side",
-  maturity: "partial",
-  limitations: "Historical logs. Live stdout/stderr from launched jobs arrives with training execution.",
+  maturity: "ready",
 });

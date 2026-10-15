@@ -16,6 +16,9 @@ pub struct AppPaths {
     pub config_dir: PathBuf,
     /// epoch.db, layouts/
     pub data_dir: PathBuf,
+    /// Where Nexis keeps the Axon engine it downloaded, if the OS has a
+    /// local data folder.
+    pub nexis_engine_dir: Option<PathBuf>,
 }
 
 /// The project open in this window.
@@ -68,6 +71,8 @@ pub struct AppState {
     /// Running queries by the id the frontend gave them, for cancellation.
     pub queries: Mutex<HashMap<String, CancelHandle>>,
     pub system: Mutex<crate::commands::system::SystemProbe>,
+    /// Jobs started from this app (training, scripts); see commands/jobs.rs.
+    pub jobs: epoch_runtime::LocalRuntime,
 }
 
 impl AppState {
