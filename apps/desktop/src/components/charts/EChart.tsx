@@ -80,11 +80,12 @@ export function EChart({
   label: string;
 }) {
   const host = React.useRef<HTMLDivElement>(null);
+  const surface = React.useRef<HTMLDivElement>(null);
   const chart = React.useRef<echarts.ECharts | null>(null);
 
   React.useEffect(() => {
-    if (!host.current) return;
-    const instance = echarts.init(host.current, undefined, { renderer: "canvas" });
+    if (!host.current || !surface.current) return;
+    const instance = echarts.init(surface.current, undefined, { renderer: "canvas" });
     chart.current = instance;
     let frame = 0;
     const observer = new ResizeObserver(() => {
@@ -109,7 +110,16 @@ export function EChart({
     chart.current?.setOption({ animation: false, ...option }, { notMerge: true });
   }, [option]);
 
-  return <div ref={host} role="img" aria-label={label} className={cn("min-h-0 min-w-0", className)} />;
+  // ECharts pins its canvas to fixed pixel sizes. Drawn straight into the
+  // host, that canvas is the host's content: until the observer's next frame
+  // resizes it, a shrunk host has the old, larger canvas spilling over its
+  // neighbours, and it props up the min-content size of whatever holds it.
+  // The absolute, clipped layer keeps the canvas out of layout entirely.
+  return (
+    <div ref={host} role="img" aria-label={label} className={cn("relative min-h-0 min-w-0 overflow-hidden", className)}>
+      <div ref={surface} className="absolute inset-0" />
+    </div>
+  );
 }
 
 /** Shared axis/tooltip styling for every chart. */
