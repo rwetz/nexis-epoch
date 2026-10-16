@@ -105,6 +105,10 @@ function TrainingMetrics() {
         // landscape shape. Rows used to stretch to the panel's height, which
         // on a large screen made each chart a tall strip; auto-fill also
         // left empty tracks to the right once the panel was wide.
+        // Each card is w-full: a grid item with an aspect ratio does not
+        // stretch, it takes its width from its height, so in a column
+        // narrower than min-h × 16/10 the card grew wider than its track and
+        // the chart drew over its neighbours.
         <div className="epoch-content-enter nexis-scrollbar grid min-h-0 flex-1 grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] content-start gap-2 overflow-y-auto p-2">
           {metrics
             .filter((m) => !hidden.has(m))
@@ -117,7 +121,7 @@ function TrainingMetrics() {
               return (
                 <section
                   key={metric}
-                  className="flex aspect-[16/10] max-h-[480px] min-h-[200px] flex-col rounded-lg border border-border/60 bg-card p-2"
+                  className="flex aspect-[16/10] max-h-[480px] min-h-[200px] w-full min-w-0 flex-col overflow-hidden rounded-lg border border-border/60 bg-card p-2"
                   aria-label={metric}
                 >
                   <header className="flex items-center gap-1.5 px-1 pb-1">
