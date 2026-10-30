@@ -118,3 +118,12 @@ Every dependency Epoch ships is under an open-source licence (MIT, Apache-2.0
 and similar; see [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md)). The workspace
 layout uses dockview's MIT core; 0.1.0's non-commercial Trellis dependency was
 replaced in 0.2.0. Epoch itself is MIT-licensed ([LICENSE](LICENSE)).
+
+---
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/heptagram-white.svg">
+    <img src="docs/brand/heptagram-black.svg" alt="heptagram" width="48">
+  </picture>
+</p>
