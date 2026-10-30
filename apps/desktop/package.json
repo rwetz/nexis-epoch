@@ -50,7 +50,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@nexis/design": "github:rwetz/nexis-design#5804c3241719ca1e838296e5b1276327c7756cea",
+    "@nexis/design": "github:rwetz/nexis-design#0faf63832323a423e7e9353e8b63d9f1aed30213",
     "@tailwindcss/vite": "^4.2.3",
     "@tauri-apps/cli": "^2.12.0",
     "@types/node": "^24.19.0",

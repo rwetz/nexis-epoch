@@ -106,7 +106,7 @@ function PanelBridge({ def, props }: { def: PanelDefinition; props: IDockviewPan
   const Component = def.component;
   return (
     <PanelContext.Provider value={handle}>
-      <div className="epoch-panel">
+      <div className="nexis-dock-panel">
         <PanelErrorBoundary name={def.title}>
           <Component />
         </PanelErrorBoundary>
@@ -123,13 +123,13 @@ function EpochTab({ api }: IDockviewPanelHeaderProps) {
   useDockviewEvent(api.onDidTitleChange, (e) => setTitle(e.title));
   const dirty = useApp((s) => !!s.dirty[panelKey(workspace, api.id)]);
   return (
-    <div className="epoch-tab" title={title} onAuxClick={(e) => e.button === 1 && void requestClose(workspace, api)}>
-      {def && <Icon name={def.icon} size="xs" className="epoch-tab-icon" />}
+    <div className="nexis-dock-tab" title={title} onAuxClick={(e) => e.button === 1 && void requestClose(workspace, api)}>
+      {def && <Icon name={def.icon} size="xs" className="nexis-dock-tab-icon" />}
       <span className="truncate">{title}</span>
       <button
         type="button"
         aria-label={dirty ? `${title} has unsaved changes. Close` : `Close ${title}`}
-        className={cn("epoch-tab-close", dirty && "is-dirty")}
+        className={cn("nexis-dock-tab-close", dirty && "is-dirty")}
         // Keep a press on the button from starting a tab drag.
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
@@ -137,8 +137,8 @@ function EpochTab({ api }: IDockviewPanelHeaderProps) {
           void requestClose(workspace, api);
         }}
       >
-        <span aria-hidden className="epoch-tab-dot" />
-        <Icon name="close" size={10} className="epoch-tab-x" />
+        <span aria-hidden className="nexis-dock-tab-dot" />
+        <Icon name="close" size={10} className="nexis-dock-tab-x" />
       </button>
     </div>
   );
@@ -167,7 +167,7 @@ export function DockviewWorkspace({ preset, initialDocument, onDocumentChange, o
   );
 
   const theme = React.useMemo<DockviewTheme>(
-    () => ({ name: "epoch", className: "dockview-theme-epoch", colorScheme: resolvedMode, gap: 5 }),
+    () => ({ name: "epoch", className: "dockview-theme-nexis", colorScheme: resolvedMode, gap: 5 }),
     [resolvedMode],
   );
 

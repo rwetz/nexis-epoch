@@ -105,7 +105,7 @@ function TrainingMetrics() {
         // landscape shape. Rows used to stretch to the panel's height, which
         // on a large screen made each chart a tall strip; auto-fill also
         // left empty tracks to the right once the panel was wide.
-        <div className="epoch-content-enter nexis-scrollbar grid min-h-0 flex-1 grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] content-start gap-2 overflow-y-auto p-2">
+        <div className="nexis-content-enter nexis-scrollbar grid min-h-0 flex-1 grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] content-start gap-2 overflow-y-auto p-2">
           {metrics
             .filter((m) => !hidden.has(m))
             .map((metric) => {

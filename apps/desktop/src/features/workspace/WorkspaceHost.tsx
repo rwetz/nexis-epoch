@@ -62,7 +62,7 @@ export function WorkspaceHost({ id, active }: { id: WorkspaceId; active: boolean
 
   return (
     <div
-      className="epoch-workspace absolute inset-0 p-1.5"
+      className="nexis-dock absolute inset-0 p-1.5"
       data-active={active}
       aria-hidden={!active}
       inert={!active}

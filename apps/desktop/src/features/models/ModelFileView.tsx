@@ -93,7 +93,7 @@ export function ModelFileView({ path }: { path: string }) {
   const onnx = info.onnx;
   const metadata = Object.entries(info.metadata);
   return (
-    <div className="epoch-content-enter nexis-scrollbar flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-3">
+    <div className="nexis-content-enter nexis-scrollbar flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-3">
       <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2">
         <Stat label="Parameters" value={formatParams(info.parameters)} caption={formatCount(info.parameters)} />
         <Stat label={info.format === "onnx" ? "Initializers" : "Tensors"} value={formatCount(info.tensorCount)} />
