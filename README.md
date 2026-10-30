@@ -1,8 +1,19 @@
-# Nexis Epoch
+<p align="center">
+  <img src="assets/logo.png" width="128" alt="Epoch logo">
+</p>
 
-```
-Epoch   build. train. discover.   a local research studio for your own models and data
-```
+<h1 align="center">Nexis Epoch</h1>
+
+<p align="center">
+  Build. train. discover. A local research studio for your own models and data.
+</p>
+
+<p align="center">
+  <a href="https://github.com/rwetz/nexis-epoch/actions/workflows/ci.yml"><img src="https://github.com/rwetz/nexis-epoch/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-222B36?labelColor=101319" alt="License"></a>
+</p>
+
+<!-- TODO(readme-standard): add docs/main.png, a screenshot of the running app, and reference it here -->
 
 Epoch is a local-first desktop application for data science and machine
 learning work: open any Python/ML repository as it is, explore its datasets
